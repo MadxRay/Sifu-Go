@@ -1,0 +1,950 @@
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  MapPin, Search, Wrench, Key, Zap, Droplet, Star,
+  Clock, Shield, User, MessageCircle, Ticket,
+  Grid, ChevronLeft, ChevronRight, X, Megaphone,
+  Phone, CheckCircle, Send, MoreVertical, Headphones,
+  Wallet, CreditCard, Globe, HelpCircle, LogOut, Settings,
+  Plus, Camera, ChevronDown, Trash2, Filter, AlertTriangle, 
+  Briefcase, Power, Laptop, ArrowRight, Users, MessageSquare,
+  ThumbsUp, Share2, CornerUpRight, Navigation, Image
+} from 'lucide-react';
+
+// ==========================================
+// 1. 资源引入 (保持不变)
+// ==========================================
+import IconLockSmith from './assets/img/icons/icon-cat-lock-smith-service.png';
+import IconPlumbingElect from './assets/img/icons/icon-cat-plumbing-electrical-repair.png';
+import IconHomeAppRepair from './assets/img/icons/icon-cat-home-appliance-repair.png';
+import IconHouseKeepClean from './assets/img/icons/icon-cat-house-keeping-cleaning.png';
+import IconAirConRepair from './assets/img/icons/icon-cat-air-conditioning-repair.png';
+import IconPaintCoat from './assets/img/icons/icon-cat-painting-coating.png';
+import IconFurnitureWork from './assets/img/icons/icon-cat-carpentry-furniture-work.png';
+import IconGardenService from './assets/img/icons/icon-cat-gardening-service.png';
+import IconMovingService from './assets/img/icons/icon-cat-moving-service.png';
+import IconPestControl from './assets/img/icons/icon-cat-pest-control-service.png';
+import IconCarRepair from './assets/img/icons/icon-cat-car-repair.png';
+import IconComputerRepair from './assets/img/icons/icon-cat-computer-repair.png';
+import IconRoofRepair from './assets/img/icons/icon-cat-roof-repair.png';
+import IconFlooring from './assets/img/icons/icon-cat-flooring-installation.png';
+import IconDoorWindow from './assets/img/icons/icon-cat-door-window-repair.png';
+import IconSolarPanel from './assets/img/icons/icon-cat-solar-panel-installation.png';
+
+import { translations } from './translations';
+
+// ==========================================
+// 2. 模拟数据
+// ==========================================
+const categories = [
+  { id: 1, label: "cat_lock", icon: <Key />, color: "bg-purple-100 text-purple-600", type: "cat_lock" },
+  { id: 2, label: "cat_plumbing", icon: <Droplet />, color: "bg-blue-100 text-brand-blue", type: "cat_plumbing" },
+  { id: 3, label: "cat_electric", icon: <Zap />, color: "bg-yellow-100 text-yellow-600", type: "cat_electric" },
+  { id: 4, label: "cat_repair", icon: <Wrench />, color: "bg-green-100 text-green-600", type: "cat_repair" },
+  { id: 5, label: "cat_more", icon: <Grid />, color: "bg-gray-100 text-gray-600", action: "more" },
+];
+
+const moreServices = [
+  { label: "svc_lock", icon: IconLockSmith, type: "cat_lock" },
+  { label: "svc_plumb", icon: IconPlumbingElect, type: "cat_plumbing" },
+  { label: "svc_home_app_repair", icon: IconHomeAppRepair, type: "cat_repair" },
+  { label: "svc_house_cleaning", icon: IconHouseKeepClean, type: "svc_clean" },
+  { label: "svc_aircon_repair", icon: IconAirConRepair, type: "svc_ac" },
+  { label: "svc_paint_coat", icon: IconPaintCoat, type: "svc_reno" },
+  { label: "svc_furniture", icon: IconFurnitureWork, type: "svc_reno" },
+  { label: "svc_garden_service", icon: IconGardenService, type: "svc_clean" },
+  { label: "svc_moving_service", icon: IconMovingService, type: "svc_moving" },
+  { label: "svc_pest_control", icon: IconPestControl, type: "svc_pest" },
+  { label: "svc_car_repair", icon: IconCarRepair, type: "cat_repair" },
+  { label: "svc_computer_repair", icon: IconComputerRepair, type: "cat_repair" },
+  { label: "svc_roof_repair", icon: IconRoofRepair, type: "svc_reno" },
+  { label: "svc_flooring", icon: IconFlooring, type: "svc_reno" },
+  { label: "svc_door_window", icon: IconDoorWindow, type: "svc_reno" },
+  { label: "svc_solar_panel", icon: IconSolarPanel, type: "cat_electric" },
+];
+
+const promotions = [
+  { id: 1, title: "promo_1_title", sub: "promo_1_sub", color: "from-blue-500 to-blue-700" },
+  { id: 2, title: "promo_2_title", sub: "promo_2_sub", color: "from-green-500 to-emerald-700" },
+  { id: 3, title: "promo_3_title", sub: "promo_3_sub", color: "from-orange-400 to-red-500" },
+];
+
+const sifuData = [
+  { id: 1, name: "王师傅 (Sifu Ong)", category: "cat_lock", skill: "开锁专家", rating: 4.9, jobs: 128, dist: "0.5km", price: "RM 80起", status: "空闲", bio: "拥有15年开锁经验，专攻各类防盗门、汽车锁。承诺无损开锁，30分钟必达。", reviews: ["技术很好！", "准时到达。"] },
+  { id: 2, name: "Ah Seng 电工", category: "cat_electric", skill: "电路维修", rating: 4.7, jobs: 85, dist: "1.2km", price: "RM 60起", status: "忙碌", bio: "持牌专业电工，擅长解决跳闸、漏电、线路老化问题。安全第一。", reviews: ["很细心。"] },
+  { id: 3, name: "Ali 水管", category: "cat_plumbing", skill: "疏通下水道", rating: 4.8, jobs: 210, dist: "2.3km", price: "RM 50起", status: "空闲", bio: "专治各种堵塞，不通不收费。自带专业疏通机器。", reviews: ["Friendly service."] },
+  { id: 4, name: "Ken Aircon", category: "svc_ac", skill: "冷气清洗/加氟", rating: 4.6, jobs: 320, dist: "3.5km", price: "RM 100起", status: "空闲", bio: "专业冷气清洗，包含药水洗、拆机洗。", reviews: ["很干净，冷气变冷了。"] },
+  { id: 5, name: "Muthu Mover", category: "svc_moving", skill: "搬家服务", rating: 5.0, jobs: 45, dist: "5.0km", price: "RM 150起", status: "空闲", bio: "提供 1吨/3吨 罗里，包含搬运工。", reviews: ["Fast and careful."] }
+];
+
+const activeOrder = {
+  id: "ORD-8823", sifuName: "王师傅 (Sifu Ong)", service: "大门开锁服务", price: "RM 80.00", status: "赶往现场中", eta: "5 分钟",
+  timeline: [
+    { time: "14:30", text: "订单已确认", done: true },
+    { time: "14:32", text: "王师傅已接单", done: true },
+    { time: "14:35", text: "师傅正在赶往现场", done: false, current: true },
+    { time: "--:--", text: "师傅到达", done: false },
+    { time: "--:--", text: "服务完成", done: false },
+  ]
+};
+
+const pastOrders = [
+  { id: "ORD-1022", sifu: "Ali 水管", service: "厨房疏通", date: "2023-10-05", price: "RM 120", status: "已完成" },
+  { id: "ORD-0911", sifu: "Ah Seng 电工", service: "更换插座", date: "2023-09-28", price: "RM 60", status: "已完成" },
+];
+
+const vouchersData = [
+  { id: 1, type: "cash", title: "v_1_title", value: "RM 15", sub: "OFF", condition: "v_1_cond", expiry: "v_1_exp", color: "from-brand-orange to-red-500" },
+  { id: 2, type: "discount", title: "v_2_title", value: "10%", sub: "DISCOUNT", condition: "v_2_cond", expiry: "v_2_exp", color: "from-blue-500 to-blue-600" },
+  { id: 3, type: "free", title: "v_3_title", value: "Free", sub: "VISIT", condition: "v_3_cond", expiry: "v_3_exp", color: "from-green-500 to-emerald-600" },
+];
+
+const chatList = [
+  { id: 1, name: "王师傅 (Sifu Ong)", lastMsg: "好的老板，我到了给你电话。", time: "14:35", unread: 2, avatar: <Key size={20}/>, bg: "bg-purple-100 text-purple-600" },
+  { id: 2, name: "Sifu-Go 客服中心", lastMsg: "您的RM15优惠券已到账，请查收。", time: "昨天", unread: 0, avatar: <Headphones size={20}/>, bg: "bg-blue-100 text-brand-blue" },
+  { id: 3, name: "Ali 水管", lastMsg: "Thank you boss!", time: "10月5日", unread: 0, avatar: <Droplet size={20}/>, bg: "bg-blue-100 text-brand-blue" },
+];
+
+const chatHistoryMock = [
+  { id: 1, sender: "me", text: "师傅，请问大概还要多久？", time: "14:30" },
+  { id: 2, sender: "sifu", text: "老板你好，我现在在 Puchong 过来。", time: "14:31" },
+  { id: 3, sender: "sifu", text: "大概 15-20 分钟左右到。", time: "14:32" },
+  { id: 4, sender: "me", text: "好的，到了打给我。", time: "14:32" },
+  { id: 5, sender: "sifu", text: "好的老板，我到了给你电话。", time: "14:35" },
+];
+
+const initialAddresses = [
+  { id: 1, label: "Home", address: "No. 18, Jalan Indah 3/2, Taman Universiti Indah, 43300 Seri Kembangan", isDefault: true },
+  { id: 2, label: "Office", address: "Level 5, Menara 123, Jalan Bukit Bintang, 55100 Kuala Lumpur", isDefault: false },
+];
+
+const initialCards = [
+  { id: 1, type: "visa", number: "**** **** **** 4242", expiry: "12/26", brand: "Maybank Debit" },
+  { id: 2, type: "tng", number: "已绑定", expiry: "-", brand: "Touch 'n Go" },
+];
+
+const sifuStats = { todayEarnings: "180.00", jobsDone: 3, acceptanceRate: "95%" };
+const incomingJob = { id: "JOB-999", type: "SOS", category: "爆水管 / 漏水", dist: "0.8km", address: "B-12-05, Pangsapuri Indah", price: "RM 80 - RM 120", customer: "Mdm. Lee", customerPhone: "012-*** 9999", time: "立即出发" };
+
+// 社区数据
+const communityPosts = [
+  { id: 1, author: "Ah Hock (水电)", avatar: <Droplet size={16}/>, type: "job_pass", content: "【打单】Puchong IOI 附近有个修马桶的单，我在 PJ 赶不过去，谁能接？Rm80 现结。", time: "10分钟前", likes: 2, comments: 5 },
+  { id: 2, author: "Sifu Mark (冷气)", avatar: <Zap size={16}/>, type: "discuss", content: "最近 Daikin 的冷气机有没有觉得很难拆？尤其是新款的，卡扣很紧。", time: "2小时前", likes: 12, comments: 8 },
+  { id: 3, author: "Uncle Lim (装修)", avatar: <Wrench size={16}/>, type: "promo", content: "收二手电钻，有的私信我。", time: "5小时前", likes: 0, comments: 1 },
+];
+
+// ==========================================
+// 新增: 用户需求广场模拟数据
+// ==========================================
+const initialUserRequests = [
+  { 
+    id: 1, 
+    user: "Mdm. Lee", 
+    avatar: null,
+    category: "冷气服务", 
+    title: "两台 Daikin 冷气不冷了", 
+    desc: "开了16度还是感觉像送风，而且出风口有点漏水，需要清洗和检查 gas。", 
+    photos: ["https://images.unsplash.com/photo-1545259741-2ea3ebf61fa3?auto=format&fit=crop&w=400&q=80"], 
+    dist: "1.2km", 
+    address: "Taman Equine, Seri Kembangan",
+    time: "10分钟前",
+    status: "open", // open, completed
+    comments: [
+      { id: 101, sifu: "王师傅", text: "老板，这个情况应该是要做 Chemical wash 了。普通洗 RM100，药水洗 RM150。", time: "5分钟前", priceOffer: "RM 150" }
+    ]
+  },
+  { 
+    id: 2, 
+    user: "Jason Lim", 
+    avatar: null,
+    category: "房屋修缮", 
+    title: "厨房洗手盆下面漏水", 
+    desc: "应该是水管老化了，整个柜子都湿了。需要换新的水管。", 
+    photos: ["https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=400&q=80"], 
+    dist: "3.5km", 
+    address: "Puchong Jaya",
+    time: "2小时前",
+    status: "open",
+    comments: []
+  }
+];
+
+// ==========================================
+// 3. 组件: 认证屏幕
+// ==========================================
+const AuthScreen = ({ onLogin }) => {
+    const [step, setStep] = useState('landing');
+    const [role, setRole] = useState('user');
+    const [mobile, setMobile] = useState('');
+
+    const handleLogin = () => { onLogin(role); };
+
+    if (step === 'landing') {
+        return (
+            <div className="flex flex-col h-full bg-brand-blue text-white animate-fade-in relative overflow-hidden md:flex-row">
+                {/* Desktop Left */}
+                <div className="flex-1 flex flex-col items-center justify-center p-8 z-10 md:items-start md:pl-20">
+                    <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mb-6 shadow-xl transform rotate-3 text-brand-blue">
+                        <Wrench size={48} />
+                    </div>
+                    <h1 className="text-4xl font-bold mb-2 tracking-tight md:text-6xl">Sifu-Go</h1>
+                    <p className="text-blue-100 text-center mb-12 md:text-left md:text-xl">
+                        马来西亚首选家庭服务平台。<br/>解决生活琐事，只需一键呼叫。
+                    </p>
+                    <div className="hidden md:block text-blue-200 text-sm mt-8">
+                        💻 网页版 / 📱 手机 App 全平台支持
+                    </div>
+                </div>
+
+                {/* Desktop Right */}
+                <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white/5 backdrop-blur-sm md:bg-white md:text-gray-800">
+                    <div className="w-full max-w-sm space-y-4">
+                        <button onClick={() => { setRole('user'); setStep('login'); }} className="w-full bg-white text-brand-blue font-bold py-4 rounded-xl shadow-lg active:scale-95 transition md:bg-brand-blue md:text-white">我是用户 (找师傅)</button>
+                        <button onClick={() => { setRole('sifu'); setStep('login'); }} className="w-full bg-brand-orange text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2"><Briefcase size={20} /> 我是师傅 (接单)</button>
+                    </div>
+                    <div className="p-4 text-center text-xs text-blue-200 md:text-gray-400 mt-4">Version 1.2.0</div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex flex-col h-full bg-white animate-slide-up items-center justify-center">
+            <div className="w-full max-w-md p-6">
+                <button onClick={() => setStep('landing')} className="mb-6 p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition"><ChevronLeft size={28} className="text-gray-800" /></button>
+                <h2 className="text-3xl font-bold mb-2">{role === 'user' ? '欢迎回来' : '加入 Sifu 团队'}</h2>
+                <p className="text-gray-500 mb-8">{role === 'user' ? '输入手机号开始找师傅' : '注册成为专业师傅，开始接单赚钱'}</p>
+                <div className="space-y-6">
+                    <div>
+                        <label className="text-xs font-bold text-gray-400 uppercase">手机号码</label>
+                        <div className="flex items-center border-b-2 border-gray-100 py-2 focus-within:border-brand-blue transition">
+                            <span className="text-gray-500 font-bold mr-3">+60</span>
+                            <input type="tel" value={mobile} onChange={(e) => setMobile(e.target.value)} className="flex-1 outline-none text-xl font-bold text-gray-800 placeholder-gray-300" placeholder="12 345 6789" autoFocus />
+                        </div>
+                    </div>
+                    <button onClick={handleLogin} className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition active:scale-95 ${mobile.length > 8 ? (role === 'user' ? 'bg-brand-blue' : 'bg-gray-900') : 'bg-gray-300 cursor-not-allowed'}`}>
+                        {role === 'user' ? '获取验证码' : '下一步: 验证身份'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ==========================================
+// 4. 组件: 师傅端 (含需求广场 & 互动)
+// ==========================================
+const SifuDashboard = ({ onLogout }) => {
+    const [isOnline, setIsOnline] = useState(false);
+    const [activeTab, setActiveTab] = useState('home');
+    const [showNewJob, setShowNewJob] = useState(false);
+    const [activeJob, setActiveJob] = useState(null); // 当前进行中的订单
+    const [jobStep, setJobStep] = useState(0); 
+    const [showChat, setShowChat] = useState(false); 
+    
+    // 新增: 需求广场逻辑
+    const [requestList, setRequestList] = useState(initialUserRequests);
+    const [selectedRequest, setSelectedRequest] = useState(null); // 查看某个需求详情
+    const [replyText, setReplyText] = useState("");
+
+    const steps = ["已接单", "前往中", "工作中", "已完成"];
+
+    // 模拟SOS推单
+    useEffect(() => {
+        if(isOnline && !activeJob) {
+            const timer = setTimeout(() => setShowNewJob(true), 5000); // 稍微延长时间，方便看广场
+            return () => clearTimeout(timer);
+        } else {
+            setShowNewJob(false);
+        }
+    }, [isOnline, activeJob]);
+
+    const handleAcceptJob = () => { setShowNewJob(false); setActiveJob(incomingJob); setJobStep(1); setActiveTab('home'); };
+    const handleJobAction = () => { if (jobStep < 3) { setJobStep(prev => prev + 1); } else { setActiveJob(null); setJobStep(0); alert("订单完成！"); } };
+
+    // 师傅发表评论/报价
+    const handlePostComment = () => {
+        if(!replyText.trim()) return;
+        const newComment = { id: Date.now(), sifu: "我 (Alex Ong)", text: replyText, time: "刚刚", priceOffer: null };
+        const updatedRequests = requestList.map(req => req.id === selectedRequest.id ? { ...req, comments: [...req.comments, newComment] } : req);
+        setRequestList(updatedRequests);
+        setSelectedRequest({ ...selectedRequest, comments: [...selectedRequest.comments, newComment] });
+        setReplyText("");
+    };
+
+    // 渲染：需求详情弹窗 (师傅看用户的帖子)
+    const renderRequestDetailModal = () => (
+        <div className="fixed inset-0 z-[60] bg-white flex flex-col animate-slide-up md:absolute md:inset-0">
+            <div className="bg-white p-4 pt-8 border-b border-gray-100 shadow-sm flex items-center gap-3 sticky top-0 z-10">
+                <button onClick={() => setSelectedRequest(null)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition"><ChevronLeft size={20}/></button>
+                <div className="flex-1"><h2 className="font-bold text-gray-800 text-lg">需求详情</h2></div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 pb-24">
+                {/* 用户信息 */}
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-brand-blue font-bold">{selectedRequest.user[0]}</div>
+                    <div><h3 className="font-bold text-gray-800">{selectedRequest.user}</h3><p className="text-xs text-gray-500">{selectedRequest.time} • {selectedRequest.dist}</p></div>
+                </div>
+                {/* 内容 */}
+                <h2 className="text-xl font-bold text-gray-900 mb-2">{selectedRequest.title}</h2>
+                <div className="flex items-center gap-2 mb-4"><span className="bg-brand-orange/10 text-brand-orange text-xs font-bold px-2 py-1 rounded">{selectedRequest.category}</span><span className="text-xs text-gray-400"><MapPin size={10} className="inline"/> {selectedRequest.address}</span></div>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">{selectedRequest.desc}</p>
+                {/* 照片墙 */}
+                {selectedRequest.photos && selectedRequest.photos.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2 mb-6">
+                        {selectedRequest.photos.map((img, i) => <img key={i} src={img} className="rounded-xl w-full h-32 object-cover shadow-sm border border-gray-100" />)}
+                    </div>
+                )}
+                {/* 评论区 */}
+                <div className="border-t border-gray-100 pt-4">
+                    <h4 className="font-bold text-sm text-gray-700 mb-4">留言沟通 / 报价 ({selectedRequest.comments.length})</h4>
+                    <div className="space-y-4">
+                        {selectedRequest.comments.map(c => (
+                            <div key={c.id} className="flex gap-3">
+                                <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+                                <div className="bg-gray-50 p-3 rounded-xl rounded-tl-none flex-1">
+                                    <div className="flex justify-between items-baseline mb-1"><span className="text-xs font-bold text-gray-800">{c.sifu}</span><span className="text-[10px] text-gray-400">{c.time}</span></div>
+                                    <p className="text-sm text-gray-600">{c.text}</p>
+                                    {c.priceOffer && <div className="mt-2 text-brand-blue font-bold text-sm">报价: {c.priceOffer}</div>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            {/* 底部输入框 */}
+            <div className="p-4 bg-white border-t border-gray-100 pb-8">
+                <div className="flex gap-2">
+                    <input type="text" value={replyText} onChange={e => setReplyText(e.target.value)} placeholder="询问详情或直接报价..." className="flex-1 bg-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-blue border border-transparent"/>
+                    <button onClick={handlePostComment} className="bg-brand-blue text-white px-4 rounded-xl font-bold text-sm">发送</button>
+                </div>
+            </div>
+        </div>
+    );
+
+    // 渲染：进行中的订单 (Active Job) - 保持上次修复的样式
+    const renderActiveJobView = () => (
+        <div className="flex flex-col h-full bg-gray-50 animate-slide-up relative">
+            <div className="h-2/5 w-full relative bg-gray-200"><iframe width="100%" height="100%" frameBorder="0" scrolling="no" src="https://www.openstreetmap.org/export/embed.html?bbox=101.68685913085939%2C3.006931201367338%2C101.72668457031251%2C3.033504907992788&amp;layer=mapnik" className="w-full h-full opacity-80 mix-blend-multiply"></iframe><div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-lg border border-white/20"><div className="flex items-center gap-2"><Navigation size={16} className="text-blue-500" /><span className="text-xs font-bold text-gray-800">距离 0.8km</span></div></div></div>
+            <div className="flex-1 bg-white -mt-6 rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.1)] relative z-10 flex flex-col p-6 pb-24 overflow-y-auto">
+                <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6"></div>
+                <div className="flex justify-between mb-8 relative px-2">
+                    <div className="absolute top-3 left-0 w-full h-1 bg-gray-100 -mt-0.5 z-0"></div>
+                    <div className={`absolute top-3 left-0 h-1 bg-green-500 -mt-0.5 z-0 transition-all duration-500`} style={{ width: `${(jobStep / 3) * 100}%` }}></div>
+                    {steps.map((s, i) => (<div key={i} className="relative z-10 flex flex-col items-center gap-1"><div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 text-[10px] font-bold transition-colors ${i <= jobStep ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}>{i < jobStep ? <CheckCircle size={12}/> : i + 1}</div><span className={`text-[10px] font-bold ${i <= jobStep ? 'text-green-600' : 'text-gray-300'}`}>{s}</span></div>))}
+                </div>
+                <div className="flex items-center gap-4 mb-6"><div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center text-brand-blue font-bold text-xl border-2 border-white shadow-md">L</div><div className="flex-1"><h2 className="text-xl font-bold text-gray-800">{activeJob.customer}</h2><div className="flex items-center gap-2 text-sm text-gray-500"><Star size={14} className="text-yellow-400 fill-current"/> 4.8 (12 单)</div></div><button className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200"><Phone size={20}/></button></div>
+                <div className="space-y-4 mb-8"><div className="flex gap-3 items-start p-3 bg-gray-50 rounded-xl"><MapPin size={20} className="text-gray-400 mt-0.5 flex-shrink-0" /><div><h4 className="font-bold text-sm text-gray-800">服务地址</h4><p className="text-sm text-gray-600 leading-relaxed">{activeJob.address}</p></div></div><div className="flex gap-3 items-start p-3 bg-orange-50 rounded-xl"><Zap size={20} className="text-brand-orange mt-0.5 flex-shrink-0" /><div><h4 className="font-bold text-sm text-gray-800">服务内容</h4><p className="text-sm text-gray-600">{activeJob.category}</p></div></div></div>
+                <div className="mt-auto"><button onClick={handleJobAction} className={`w-full py-4 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 transition active:scale-95 ${jobStep === 3 ? 'bg-gray-800' : 'bg-brand-blue'}`}>{jobStep === 1 && <><Navigation size={20}/> 我已到达</>}{jobStep === 2 && <><Wrench size={20}/> 开始工作</>}{jobStep === 3 && <><CheckCircle size={20}/> 完成订单</>}</button>{jobStep < 3 && <button onClick={() => {if(confirm("确定取消订单吗？会影响信誉分。")) {setActiveJob(null); setJobStep(0);}}} className="w-full mt-3 py-3 text-red-400 font-bold text-sm">取消订单</button>}</div>
+            </div>
+            <button onClick={() => setShowChat(true)} className="absolute bottom-28 right-6 w-14 h-14 bg-green-500 text-white rounded-full shadow-2xl flex items-center justify-center z-20 hover:scale-110 transition active:scale-95 animate-bounce-subtle"><MessageCircle size={28} /><span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center border-2 border-white">1</span></button>
+            {showChat && (<div className="absolute inset-0 z-50 bg-white flex flex-col animate-slide-up"><div className="p-4 bg-white border-b border-gray-100 flex justify-between items-center shadow-sm"><div className="flex items-center gap-3"><button onClick={() => setShowChat(false)} className="text-gray-900"><ChevronLeft size={24}/></button><h3 className="font-bold text-gray-800">{activeJob.customer}</h3></div><Phone size={20} className="text-gray-400"/></div><div className="flex-1 bg-gray-50 p-4 overflow-y-auto"><div className="flex justify-start mb-4"><div className="bg-white p-3 rounded-xl rounded-tl-none shadow-sm text-sm text-gray-700 max-w-[80%]">师傅，大概还要多久到？我家水管漏得很厉害。</div></div><div className="flex justify-end mb-4"><div className="bg-brand-blue p-3 rounded-xl rounded-tr-none shadow-md text-sm text-white max-w-[80%]">我已经在楼下了，正在找停车位，马上上来！</div></div></div><div className="p-4 pb-24 md:pb-4 bg-white border-t border-gray-100 flex gap-2"><input type="text" placeholder="输入消息..." className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none"/><button className="p-2 bg-brand-blue text-white rounded-full"><Send size={18}/></button></div></div>)}
+        </div>
+    );
+
+    const renderCommunityView = () => (
+        <div className="flex flex-col h-full bg-gray-100 animate-slide-up">
+            <div className="bg-white p-6 sticky top-0 z-10 border-b border-gray-200 shadow-sm"><h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2"><Users className="text-brand-orange"/> 师傅社区</h2><div className="flex gap-2 overflow-x-auto no-scrollbar">{['全部', '打单/转单', '技术交流', '闲聊'].map((t, i) => (<button key={i} className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition ${i === 0 ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{t}</button>))}</div></div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-3 mb-2"><div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0"></div><div className="flex-1"><div className="bg-gray-50 rounded-xl p-3 text-sm text-gray-400 mb-2">分享你的经验，或者发个打单贴...</div><div className="flex justify-between items-center"><div className="flex gap-3 text-gray-400"><Camera size={18}/><MapPin size={18}/></div><button className="bg-brand-blue text-white px-4 py-1.5 rounded-lg text-xs font-bold">发布</button></div></div></div>
+                {/* 社区帖子列表 (复用 mock) */}
+                {communityPosts.map(post => (
+                    <div key={post.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <div className="flex justify-between items-start mb-3">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-blue-50 text-brand-blue rounded-full flex items-center justify-center border border-blue-100">{post.avatar}</div>
+                                <div><h4 className="font-bold text-sm text-gray-800">{post.author}</h4><p className="text-[10px] text-gray-400">{post.time}</p></div>
+                            </div>
+                            <button className="text-gray-300"><MoreVertical size={16}/></button>
+                        </div>
+                        <div className="mb-4">
+                            {post.type === 'job_pass' && <span className="bg-red-100 text-red-500 text-[10px] font-bold px-1.5 py-0.5 rounded mr-2 align-middle">急单</span>}
+                            <p className="text-sm text-gray-700 leading-relaxed">{post.content}</p>
+                        </div>
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                            <button className="flex items-center gap-1 text-xs text-gray-400 hover:text-brand-blue"><ThumbsUp size={14}/> {post.likes}</button>
+                            <button className="flex items-center gap-1 text-xs text-gray-400 hover:text-brand-blue"><MessageSquare size={14}/> {post.comments}</button>
+                            <button className="flex items-center gap-1 text-xs text-gray-400 hover:text-brand-blue"><Share2 size={14}/> 分享</button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <button className="absolute bottom-24 right-6 w-12 h-12 bg-brand-orange text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition active:scale-95"><Plus size={24}/></button>
+        </div>
+    );
+
+    return (
+        <div className="flex flex-col h-full bg-gray-900 text-white animate-fade-in relative md:flex-row w-full">
+            {/* Desktop Nav */}
+            <div className="hidden md:flex flex-col w-64 bg-gray-800 border-r border-gray-700 p-6">
+                <h1 className="text-2xl font-bold mb-8 flex items-center gap-2"><Briefcase className="text-brand-orange"/> Sifu Pro</h1>
+                <div className="space-y-2 flex-1">
+                    {[{ id: 'home', l: '接单台', i: <Briefcase size={20} /> }, { id: 'jobs', l: '任务管理', i: <Clock size={20} /> }, { id: 'community', l: '师傅社区', i: <Users size={20} /> }, { id: 'wallet', l: '我的钱包', i: <Wallet size={20} /> }, { id: 'profile', l: '个人中心', i: <User size={20} /> }].map(n => (<button key={n.id} onClick={() => setActiveTab(n.id)} className={`w-full flex items-center gap-3 p-3 rounded-xl transition ${activeTab === n.id ? 'bg-brand-orange text-white' : 'text-gray-400 hover:bg-gray-700'}`}>{n.i} <span>{n.l}</span></button>))}
+                </div>
+                <button onClick={onLogout} className="flex items-center gap-2 text-gray-500 hover:text-white mt-auto"><LogOut size={18}/> 退出登录</button>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+                {activeTab === 'community' && renderCommunityView()}
+                {activeTab === 'home' && activeJob && renderActiveJobView()}
+                
+                {/* 师傅控制台首页 (无进行中订单时显示) */}
+                {activeTab === 'home' && !activeJob && (
+                    <>
+                        <div className="md:hidden p-6 pt-12 flex justify-between items-center bg-gray-800 rounded-b-3xl shadow-lg z-10">
+                            <div className="flex items-center gap-3"><div className="w-12 h-12 bg-gray-700 rounded-full border-2 border-green-500 overflow-hidden"><img src="https://i.pravatar.cc/150?img=11" className="w-full h-full object-cover"/></div><div><h2 className="font-bold text-lg">Alex Ong</h2><div className="text-xs text-green-400">⭐ 4.9</div></div></div>
+                            <button onClick={() => setIsOnline(!isOnline)} className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold transition-all shadow-lg ${isOnline ? 'bg-green-500 text-white' : 'bg-gray-700 text-gray-400'}`}><Power size={18} /> {isOnline ? 'On' : 'Off'}</button>
+                        </div>
+                        <div className="hidden md:flex justify-between items-center p-6 bg-gray-800 border-b border-gray-700"><h2 className="text-xl font-bold">控制台</h2><div className="flex items-center gap-6"><button onClick={() => setIsOnline(!isOnline)} className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition-all ${isOnline ? 'bg-green-500 text-white' : 'bg-gray-700 text-gray-400'}`}><Power size={18} /> {isOnline ? '接单模式: 开启' : '接单模式: 关闭'}</button><div className="flex items-center gap-3"><span className="text-right"><div className="font-bold">Alex Ong</div><div className="text-xs text-gray-400">ID: 8823</div></span><img src="https://i.pravatar.cc/150?img=11" className="w-10 h-10 rounded-full bg-gray-700"/></div></div></div>
+
+                        <div className="flex-1 overflow-y-auto p-4 pb-24 md:p-8">
+                            {/* 统计数据 */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"><div className="bg-gray-800 p-4 rounded-2xl border border-gray-700"><div className="text-gray-400 text-xs mb-1">今日收入</div><div className="text-2xl font-bold text-white">RM 180.00</div></div><div className="bg-gray-800 p-4 rounded-2xl border border-gray-700"><div className="text-gray-400 text-xs mb-1">接单率</div><div className="text-2xl font-bold text-green-400">95%</div></div></div>
+                            
+                            {/* SOS 弹窗 */}
+                            {showNewJob && (
+                                <div className="max-w-md mx-auto w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-3xl p-1 shadow-2xl animate-scale-up mb-8">
+                                    <div className="bg-gray-800 rounded-[20px] p-5">
+                                        <div className="w-full h-1 bg-gray-700 rounded-full mb-4 overflow-hidden"><div className="h-full bg-brand-orange w-3/4 animate-pulse"></div></div>
+                                        <div className="flex justify-between items-start mb-4"><div><span className="bg-red-500/20 text-red-500 text-[10px] font-bold px-2 py-1 rounded mb-2 inline-block animate-pulse">紧急 SOS</span><h2 className="text-2xl font-bold text-white">爆水管 / 漏水</h2><p className="text-gray-400 text-sm mt-1 flex items-center gap-1"><MapPin size={14}/> 0.8km • Pangsapuri Indah</p></div><div className="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center"><Droplet size={24} className="text-blue-400"/></div></div>
+                                        <div className="grid grid-cols-2 gap-3"><button onClick={() => setShowNewJob(false)} className="py-3.5 rounded-xl bg-gray-700 font-bold text-gray-300">忽略</button><button onClick={handleAcceptJob} className="py-3.5 rounded-xl bg-green-500 font-bold text-white shadow-lg">立即接单</button></div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 需求广场 Feed (Job Feed) */}
+                            <div>
+                                <h3 className="text-gray-400 font-bold mb-4 flex items-center gap-2"><Globe size={16}/> 附近需求广场 (Job Feed)</h3>
+                                <div className="space-y-4">
+                                    {requestList.map(req => (
+                                        <div key={req.id} onClick={() => setSelectedRequest(req)} className="bg-gray-800 p-4 rounded-xl border border-gray-700 cursor-pointer hover:border-gray-600 transition">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center text-sm font-bold text-gray-300">{req.user[0]}</div>
+                                                    <div><h4 className="font-bold text-white text-sm">{req.user}</h4><p className="text-[10px] text-gray-400">{req.time} • {req.dist}</p></div>
+                                                </div>
+                                                <span className="bg-blue-900/50 text-blue-300 px-2 py-1 rounded text-[10px] font-bold border border-blue-800">{req.category}</span>
+                                            </div>
+                                            <h4 className="font-bold text-gray-200 mb-1">{req.title}</h4>
+                                            <p className="text-sm text-gray-400 line-clamp-2 mb-3">{req.desc}</p>
+                                            {req.photos && req.photos.length > 0 && (
+                                                <div className="flex gap-2 mb-3">
+                                                    {req.photos.map((p, idx) => <div key={idx} className="w-16 h-16 rounded-lg bg-gray-700 bg-cover bg-center" style={{backgroundImage: `url(${p})`}}></div>)}
+                                                </div>
+                                            )}
+                                            <div className="flex items-center justify-between border-t border-gray-700 pt-3">
+                                                <span className="text-xs text-gray-500 flex items-center gap-1"><MapPin size={12}/> {req.address}</span>
+                                                <div className="flex items-center gap-1 text-xs text-brand-orange font-bold"><MessageSquare size={14}/> {req.comments.length} 留言报价</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
+                
+                {/* 其他 Tab 的简单占位 */}
+                {activeTab !== 'home' && activeTab !== 'community' && (
+                    <div className="flex items-center justify-center h-full text-gray-500">开发中...</div>
+                )}
+                
+                {/* 需求详情 Modal */}
+                {selectedRequest && renderRequestDetailModal()}
+
+                {/* Mobile Bottom Nav */}
+                <div className="md:hidden absolute bottom-0 w-full bg-gray-800 border-t border-gray-700 py-3 px-6 flex justify-between items-center z-20">{[{ id: 'home', l: '接单', i: <Briefcase size={22} /> }, { id: 'jobs', l: '任务', i: <Clock size={22} /> }, { id: 'community', l: '社区', i: <Users size={22} /> }, { id: 'wallet', l: '钱包', i: <Wallet size={22} /> }, { id: 'profile', l: '我的', i: <User size={22} /> }].map(n => (<div key={n.id} onClick={() => n.id === 'profile' ? onLogout() : setActiveTab(n.id)} className={`flex flex-col items-center cursor-pointer ${activeTab === n.id ? 'text-brand-orange' : 'text-gray-500'}`}>{n.i}<span className="text-[10px] font-medium mt-1">{n.l}</span></div>))}</div>
+            </div>
+        </div>
+    );
+};
+
+// ==========================================
+// 5. 主组件: App (用户端更新)
+// ==========================================
+const App = () => {
+    // ... (保留之前的 state) ...
+    // 核心
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userRole, setUserRole] = useState('user');
+    const [activeTab, setActiveTab] = useState('find');
+    const [lang, setLang] = useState('zh');
+    const t = (key) => translations[lang][key] || key;
+
+    // UI
+    const [selectedSifu, setSelectedSifu] = useState(null);
+    const [activeChat, setActiveChat] = useState(null);
+    const [showMoreMenu, setShowMoreMenu] = useState(false);
+    const [showVoucherRules, setShowVoucherRules] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [userProfile, setUserProfile] = useState({ name: "Alex Tan", phone: "012-345 6789", avatar: null });
+
+    // Modals
+    const [modals, setModals] = useState({
+        profile: false, topup: false, withdraw: false,
+        address: false, addAddress: false,
+        payment: false, addCard: false,
+        language: false, help: false, logout: false,
+        postRequest: false, // 新增：发布需求弹窗
+    });
+    const toggleModal = (key, value) => setModals(prev => ({ ...prev, [key]: value }));
+
+    // 新增：订单 Tab 状态 (orders vs requests)
+    const [orderTab, setOrderTab] = useState('active'); // active, history, requests
+    const [myRequests, setMyRequests] = useState(initialUserRequests); // 使用模拟数据
+    const [newRequest, setNewRequest] = useState({ cat: "房屋修缮", title: "", desc: "" });
+
+    // ... (保留 Data, SOS state, Handlers 等) ...
+    // Data
+    const [addressList, setAddressList] = useState(initialAddresses);
+    const [cardList, setCardList] = useState(initialCards);
+    const [expandedFaq, setExpandedFaq] = useState(null);
+    const fileInputRef = useRef(null);
+    const [newAddr, setNewAddr] = useState({ label: "Home", detail: "" });
+    const [newCard, setNewCard] = useState({ no: "", expiry: "", cvv: "" });
+
+    // SOS
+    const [sosState, setSosState] = useState('idle');
+    const [sosType, setSosType] = useState(null);
+    const [sosLocation, setSosLocation] = useState({ id: 'gps', label: 'GPS 定位', address: 'Seri Kembangan' });
+    const [customSosText, setCustomSosText] = useState("");
+    const [tempNewAddress, setTempNewAddress] = useState("");
+
+    // Slider
+    const sliderRef = useRef(null);
+    const [isDown, setIsDown] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+    const handleMouseDown = (e) => { setIsDown(true); setStartX(e.pageX - sliderRef.current.offsetLeft); setScrollLeft(sliderRef.current.scrollLeft); };
+    const handleMouseLeave = () => setIsDown(false);
+    const handleMouseUp = () => setIsDown(false);
+    const handleMouseMove = (e) => { if (!isDown) return; e.preventDefault(); const x = e.pageX - sliderRef.current.offsetLeft; const walk = (x - startX) * 2; sliderRef.current.scrollLeft = scrollLeft - walk; };
+
+    // Handlers
+    const handleLoginSuccess = (role) => { setUserRole(role); setIsLoggedIn(true); };
+    const handleLogout = () => { setIsLoggedIn(false); setUserRole('user'); setActiveTab('find'); toggleModal('logout', false); };
+    const handleCategoryClick = (categoryType, categoryLabel) => { setSelectedCategory({ type: categoryType, label: categoryLabel }); setShowMoreMenu(false); };
+    const handleImageUpload = (e) => { const file = e.target.files[0]; if (file) setUserProfile(prev => ({ ...prev, avatar: URL.createObjectURL(file) })); };
+    const handleSetDefaultAddress = (id) => { setAddressList(prev => prev.map(addr => ({ ...addr, isDefault: addr.id === id }))); };
+    const handleAddAddress = () => { if (!newAddr.detail) return alert("请输入详细地址"); setAddressList([...addressList, { id: addressList.length + 1, label: newAddr.label, address: newAddr.detail, isDefault: false }]); setNewAddr({ label: "Home", detail: "" }); toggleModal('addAddress', false); };
+    const handleDeleteAddress = (id, e) => { e.stopPropagation(); if (window.confirm(t('confirm_delete_addr'))) { setAddressList(prev => prev.filter(addr => addr.id !== id)); } };
+    const handleAddCard = () => { if (!newCard.no) return alert("请输入卡号"); setCardList([...cardList, { id: cardList.length + 1, type: "visa", number: `**** ${newCard.no.slice(-4)}`, expiry: newCard.expiry || "12/28", brand: "New Card" }]); setNewCard({ no: "", expiry: "", cvv: "" }); toggleModal('addCard', false); };
+
+    // SOS Logic
+    const closeSOS = () => { setSosState('idle'); setSosType(null); };
+    const handleSOSClick = () => setSosState('select');
+    const handleSelectSOSLocation = (addr) => { setSosLocation(addr); setSosState('select'); };
+    const handleAddNewSOSLocation = () => { if(!tempNewAddress) return; const newAddr = { id: Date.now(), label: 'New', address: tempNewAddress, isDefault: false }; setAddressList([...addressList, newAddr]); setSosLocation(newAddr); setTempNewAddress(""); setSosState('select'); };
+    const handleSOSSelect = (type) => { setSosType(type); setSosState('scanning'); setTimeout(() => setSosState('failed'), 3000); };
+    const handleCustomSOSSubmit = () => { if(!customSosText) return; setSosType('custom'); setSosState('scanning'); setTimeout(() => setSosState('failed'), 3000); };
+    const handleExpandSearch = () => { setSosState('scanning_wide'); setTimeout(() => setSosState('found'), 3000); };
+
+    // 新增：提交需求逻辑
+    const handleSubmitRequest = () => {
+        if(!newRequest.title || !newRequest.desc) return alert("请填写完整信息");
+        const req = {
+            id: Date.now(),
+            user: "Alex Tan",
+            avatar: userProfile.avatar,
+            category: newRequest.cat,
+            title: newRequest.title,
+            desc: newRequest.desc,
+            photos: [],
+            dist: "0.0km",
+            address: "Current Location",
+            time: "刚刚",
+            status: "open",
+            comments: []
+        };
+        setMyRequests([req, ...myRequests]);
+        toggleModal('postRequest', false);
+        setNewRequest({ cat: "房屋修缮", title: "", desc: "" });
+        setActiveTab('orders');
+        setOrderTab('requests'); // 跳转到需求列表
+    };
+
+
+    // -------------------------------------------
+    // Render
+    // -------------------------------------------
+    if (!isLoggedIn) {
+        return (
+            <div className="flex flex-col h-screen bg-gray-50 font-sans mx-auto shadow-2xl overflow-hidden relative border-x border-gray-200 w-full md:border-none">
+                <AuthScreen onLogin={handleLoginSuccess} />
+            </div>
+        );
+    }
+
+    if (userRole === 'sifu') {
+        return (
+            <div className="flex flex-col h-screen bg-gray-50 font-sans mx-auto shadow-2xl overflow-hidden relative border-x border-gray-200 w-full md:border-none">
+                <SifuDashboard onLogout={handleLogout} />
+            </div>
+        );
+    }
+    
+    // ... (保留 SOS Modal renderSOSModal) ...
+    // SOS Modal (Responsive & Fixed & RESTORED VISUALS)
+    const renderSOSModal = () => {
+        if (sosState === 'idle') return null;
+        return (
+            <div className="fixed inset-0 z-[100] bg-gray-900/95 backdrop-blur-sm flex flex-col items-center justify-center text-white animate-fade-in">
+                {(sosState !== 'scanning' && sosState !== 'scanning_wide' && sosState !== 'select' && sosState !== 'custom_input') && (
+                  <button onClick={closeSOS} className="absolute top-6 right-6 p-2 bg-white/10 rounded-full z-20 hover:bg-white/20 transition"><X size={24} /></button>
+                )}
+
+                {/* 阶段 0: 选地址 */}
+                {sosState === 'location' && (
+                    <div className="w-full h-full max-w-md mx-auto flex flex-col p-6 pt-12 animate-slide-up bg-gray-900 md:rounded-2xl md:h-auto md:max-h-[600px] md:shadow-2xl">
+                        <div className="flex items-center gap-3 mb-6 relative"><button onClick={() => setSosState('select')}><ChevronLeft size={24} /></button><h3 className="font-bold text-xl">确认救援地点</h3></div>
+                        <div className="space-y-4 flex-1 overflow-y-auto">
+                            <div onClick={() => handleSelectSOSLocation({ id: 'gps', label: 'GPS 定位', address: 'Seri Kembangan' })} className="bg-white/10 p-4 rounded-xl flex items-center gap-3 cursor-pointer border border-brand-blue/50"><MapPin size={20} className="text-brand-blue"/><div><h4 className="font-bold text-sm">当前位置 (GPS)</h4></div></div>
+                            <div className="border-t border-gray-700 my-2"></div>
+                            {addressList.map(addr => (<div key={addr.id} onClick={() => handleSelectSOSLocation(addr)} className="bg-white/5 p-4 rounded-xl flex items-center gap-3 cursor-pointer"><MapPin size={20} className="text-gray-400"/><div className="flex-1 min-w-0"><h4 className="font-bold text-sm truncate">{addr.label}</h4><p className="text-xs text-gray-400 truncate">{addr.address}</p></div></div>))}
+                        </div>
+                        <div className="mt-4"><div className="flex gap-2"><input type="text" value={tempNewAddress} onChange={e => setTempNewAddress(e.target.value)} placeholder="输入新地址..." className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white"/><button onClick={handleAddNewSOSLocation} className="bg-brand-blue px-4 rounded-xl font-bold whitespace-nowrap">保存</button></div></div>
+                    </div>
+                )}
+
+                {/* 阶段 1: 选类型 */}
+                {sosState === 'select' && (
+                  <div className="w-full px-6 animate-scale-up flex flex-col h-full justify-center relative max-w-md mx-auto">
+                    <div className="absolute top-6 left-0 right-0 px-6 flex items-center gap-3 z-20">
+                        <div onClick={() => setSosState('location')} className="flex-1 min-w-0 bg-white/10 backdrop-blur-md rounded-full py-2 px-4 flex items-center justify-between cursor-pointer border border-white/10 h-12">
+                            <div className="flex items-center gap-3 overflow-hidden mr-2 flex-1 min-w-0"><MapPin size={16} className="text-brand-orange flex-shrink-0" /><div className="flex flex-col overflow-hidden min-w-0 flex-1"><span className="text-[10px] text-gray-400 font-bold leading-none mb-0.5 uppercase truncate">{sosLocation.label}</span><span className="text-xs font-bold leading-none truncate block w-full">{sosLocation.address}</span></div></div><ChevronDown size={16} className="text-gray-400 flex-shrink-0" />
+                        </div>
+                        <button onClick={closeSOS} className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 border border-white/5 transition flex-shrink-0"><X size={24} /></button>
+                    </div>
+                    <div className="flex flex-col items-center mb-6 mt-20"><div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-3 animate-pulse"><AlertTriangle size={32} className="text-white" /></div><h2 className="text-2xl font-bold text-center">紧急呼叫 (SOS)</h2><p className="text-gray-300 text-center text-xs mt-1">点击下方类型，立刻呼叫附近的师傅</p></div>
+                    <div className="grid grid-cols-1 gap-3 overflow-y-auto max-h-[60vh] pb-4 no-scrollbar">
+                      <button onClick={() => handleSOSSelect('water')} className="bg-white/10 hover:bg-white/20 border border-white/10 p-3.5 rounded-2xl flex items-center gap-4 transition active:scale-95"><div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0"><Droplet size={20} /></div><div className="text-left"><h3 className="font-bold text-md">爆水管 / 漏水</h3><p className="text-xs text-gray-300">Water Leakage</p></div></button>
+                      <button onClick={() => handleSOSSelect('power')} className="bg-white/10 hover:bg-white/20 border border-white/10 p-3.5 rounded-2xl flex items-center gap-4 transition active:scale-95"><div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0"><Zap size={20} /></div><div className="text-left"><h3 className="font-bold text-md">跳电 / 走火</h3><p className="text-xs text-gray-300">Power Failure</p></div></button>
+                      <button onClick={() => handleSOSSelect('lock')} className="bg-white/10 hover:bg-white/20 border border-white/10 p-3.5 rounded-2xl flex items-center gap-4 transition active:scale-95"><div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0"><Key size={20} /></div><div className="text-left"><h3 className="font-bold text-md">被锁门外</h3><p className="text-xs text-gray-300">Locked Out</p></div></button>
+                      <button onClick={() => { setCustomSosText(""); setSosState('custom_input'); }} className="bg-transparent hover:bg-white/5 border-2 border-dashed border-gray-600 p-3.5 rounded-2xl flex items-center gap-4 transition active:scale-95 group"><div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center text-gray-300 group-hover:bg-gray-600 transition flex-shrink-0"><Plus size={20} /></div><div className="text-left"><h3 className="font-bold text-md text-gray-300 group-hover:text-white">其他紧急情况</h3><p className="text-xs text-gray-500 group-hover:text-gray-400">Other Emergency</p></div></button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 阶段 2: 自定义输入 */}
+                {sosState === 'custom_input' && (
+                    <div className="w-full h-full max-w-md mx-auto flex flex-col p-6 pt-12 animate-slide-up bg-gray-900 md:rounded-2xl md:h-auto md:shadow-2xl">
+                        <div className="flex items-center gap-3 mb-6"><button onClick={() => setSosState('select')}><ChevronLeft size={24} /></button><h3 className="font-bold text-xl">什么紧急情况？</h3></div>
+                        <div className="flex-1 flex flex-col">
+                            <label className="text-sm text-gray-400 mb-2">请简短描述，Sifu 会立刻看到：</label>
+                            <textarea autoFocus value={customSosText} onChange={(e) => setCustomSosText(e.target.value)} placeholder="例如: 家里进蛇了、天花板塌下来..." className="w-full bg-gray-800 border border-gray-700 rounded-xl p-4 text-lg text-white focus:outline-none focus:border-brand-orange resize-none h-40 mb-6"></textarea>
+                            <button onClick={handleCustomSOSSubmit} disabled={!customSosText.trim()} className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition ${customSosText.trim() ? 'bg-red-600 text-white active:scale-95' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}><Zap size={20} fill="currentColor" /> 立即呼叫 Sifu</button>
+                        </div>
+                    </div>
+                )}
+
+                {/* 阶段 3: 扫描中 / 失败 / 成功 (RESTORED ORIGINAL UI) */}
+                {(sosState === 'scanning' || sosState === 'scanning_wide') && (
+                  <div className="flex flex-col items-center text-center px-8">
+                    <div className="relative w-48 h-48 mb-8 flex items-center justify-center"><div className={`absolute w-full h-full ${sosState === 'scanning_wide' ? 'bg-orange-500/20' : 'bg-red-500/20'} rounded-full animate-ping`}></div><div className={`absolute w-32 h-32 ${sosState === 'scanning_wide' ? 'bg-orange-500/40' : 'bg-red-500/40'} rounded-full animate-pulse`}></div><div className={`relative w-24 h-24 ${sosState === 'scanning_wide' ? 'bg-orange-600 border-orange-400' : 'bg-red-600 border-red-400'} rounded-full flex items-center justify-center shadow-2xl border-4`}><Search size={40} className="text-white animate-spin-slow" /></div></div>
+                    <h2 className="text-2xl font-bold mb-2">{sosState === 'scanning_wide' ? '正在扩大范围搜索...' : '正在搜寻附近的 Sifu...'}</h2>
+                    <p className="text-gray-300 text-sm">{sosType === 'custom' ? `需求: ${customSosText}` : (sosState === 'scanning_wide' ? '已通知 10km 内的所有师傅' : '已通知 3km 内的空闲师傅')}<br/>请保持电话畅通</p>
+                  </div>
+                )}
+                
+                {sosState === 'failed' && (
+                  <div className="w-full px-8 text-center animate-shake max-w-md">
+                      <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6"><Search size={32} className="text-gray-400" /></div>
+                      <h2 className="text-xl font-bold mb-2">附近暂时没有空闲师傅</h2>
+                      <p className="text-sm text-gray-400 mb-8">刚才搜索了 3km 范围。建议您扩大搜索范围，或联系人工客服。</p>
+                      <div className="space-y-3"><button onClick={handleExpandSearch} className="w-full bg-brand-orange text-white py-3.5 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 active:scale-95 transition"><Globe size={18} /> 扩大搜索 (10km)</button><button className="w-full bg-white text-gray-900 py-3.5 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 active:scale-95 transition"><Headphones size={18} /> 联系人工客服</button></div>
+                  </div>
+                )}
+                
+                {sosState === 'found' && (
+                  <div className="bg-white text-gray-800 w-10/12 max-w-sm rounded-3xl p-6 text-center animate-scale-up shadow-2xl">
+                      <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle size={32} /></div>
+                      <h2 className="text-xl font-bold mb-2">已接单！</h2>
+                      <p className="text-sm text-gray-500 mb-6">王师傅正在前往：<br/><span className="font-bold text-gray-800">{sosLocation.address}</span></p>
+                      <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-3 mb-6 text-left"><div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center"><User size={20}/></div><div><div className="font-bold text-sm">王师傅</div><div className="text-xs text-brand-orange font-bold">{sosType === 'custom' ? `服务: ${customSosText}` : '服务: 紧急维修'}</div></div><button className="ml-auto p-2 bg-green-500 text-white rounded-full"><Phone size={18}/></button></div>
+                      <button onClick={() => { closeSOS(); setActiveTab('orders'); }} className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl shadow-lg">查看订单详情</button>
+                  </div>
+                )}
+            </div>
+        );
+    };
+
+    // User Content
+    const renderContent = () => {
+        if (activeTab === 'find') {
+            return (
+                <div className="flex flex-col h-full bg-gray-50 animate-slide-up">
+                    <div className="bg-brand-blue px-4 pt-8 pb-6 shadow-md z-10 rounded-b-3xl md:rounded-none md:px-8">
+                        <div className="flex items-center text-white mb-4 max-w-4xl mx-auto w-full"><MapPin className="w-5 h-5 mr-1" /><span className="font-bold text-lg">Seri Kembangan</span><span className="ml-auto text-xs bg-white/20 px-2 py-1 rounded-lg backdrop-blur-sm border border-white/30">{t('nearby')}</span></div>
+                        <div className="relative max-w-4xl mx-auto w-full"><input type="text" placeholder={t('search_placeholder')} className="w-full bg-white text-gray-800 py-3 pl-10 pr-4 rounded-xl text-sm shadow-lg focus:outline-none"/><Search className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" /></div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto pb-24 pt-4 no-scrollbar">
+                        <div className="max-w-4xl mx-auto w-full px-4">
+                            <div className="hidden md:flex justify-between items-center mb-6 bg-white p-6 rounded-2xl shadow-sm"><div><h2 className="text-2xl font-bold text-gray-800">欢迎使用网页版</h2><p className="text-gray-500">更大的屏幕，更清晰的服务展示。</p></div><Laptop size={64} className="text-brand-blue opacity-20"/></div>
+                            <div className="mx-0 mb-6 bg-gray-100 rounded-2xl shadow-inner h-40 relative overflow-hidden border border-gray-200 z-0"><iframe width="100%" height="100%" frameBorder="0" scrolling="no" marginHeight="0" marginWidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=101.68685913085939%2C3.006931201367338%2C101.72668457031251%2C3.033504907992788&amp;layer=mapnik" className="w-full h-full opacity-80 mix-blend-multiply"></iframe><div className="absolute inset-0 bg-transparent pointer-events-none shadow-[inset_0_0_20px_rgba(0,0,0,0.1)]"></div></div>
+                            <div className="mb-6"><div className="grid grid-cols-5 gap-2 md:grid-cols-10 md:gap-4">{categories.map((item) => (<div key={item.id} onClick={() => item.action === 'more' ? setShowMoreMenu(true) : handleCategoryClick(item.type, item.label)} className="flex flex-col items-center gap-1 cursor-pointer hover:bg-white/50 p-2 rounded-xl transition"><div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${item.color} shadow-sm active:scale-90 transition`}>{React.cloneElement(item.icon, { size: 20 })}</div><span className="text-[10px] font-medium text-gray-600">{t(item.label)}</span></div>))}</div></div>
+                            {/* 修改: 增加“发布需求”按钮 */}
+                            <div className="mb-6">
+                                <div className="bg-gradient-to-r from-brand-orange to-red-500 rounded-2xl p-4 text-white shadow-lg md:p-8">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h2 className="font-bold text-lg flex items-center gap-1 md:text-2xl"><Zap size={18} fill="white" /> {t('sos')}</h2>
+                                        <button onClick={handleSOSClick} className="bg-white text-red-500 px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm active:bg-gray-100">{t('call')}</button>
+                                    </div>
+                                    <p className="text-orange-100 text-xs mb-4">{t('sos_desc')}</p>
+                                    <div className="h-px bg-white/20 my-3"></div>
+                                    <div className="flex justify-between items-center">
+                                        <div className="text-sm font-bold flex items-center gap-1"><MessageSquare size={16}/> 非紧急需求?</div>
+                                        <button onClick={() => toggleModal('postRequest', true)} className="bg-white/20 border border-white/40 text-white px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-white/30 transition">发布需求帖</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mb-6"><div className="flex justify-between items-center mb-2"><h3 className="font-bold text-gray-800 text-sm flex items-center gap-1"><Megaphone size={14} className="text-brand-blue" /> {t('promo')}</h3><span className="text-[10px] text-gray-400">{t('view_all')}</span></div><div ref={sliderRef} onMouseDown={handleMouseDown} onMouseLeave={handleMouseLeave} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove} className={`flex overflow-x-auto gap-3 no-scrollbar pb-2 cursor-grab ${isDown ? 'cursor-grabbing' : ''}`}>{promotions.map((promo) => (<div key={promo.id} className={`flex-shrink-0 w-64 h-24 rounded-xl bg-gradient-to-r ${promo.color} p-4 text-white shadow-md flex flex-col justify-center relative overflow-hidden select-none`}><div className="absolute right-0 top-0 w-16 h-16 bg-white/10 rounded-full -mr-8 -mt-8 blur-lg"></div><h4 className="font-bold text-lg relative z-10">{t(promo.title)}</h4><p className="text-white/80 text-xs relative z-10">{t(promo.sub)}</p></div>))}</div></div>
+                            <div><h3 className="font-bold text-gray-800 text-lg mb-3">{t('rec_sifu')}</h3><div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">{sifuData.map((pro) => (<div key={pro.id} onClick={() => setSelectedSifu(pro)} className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition cursor-pointer group"><div className="flex items-start"><div className="w-14 h-14 bg-gray-50 rounded-lg mr-3 flex-shrink-0 flex items-center justify-center text-gray-400"><Key size={24} /></div><div className="flex-1"><div className="flex justify-between"><h4 className="font-bold text-gray-800 text-sm">{pro.name}</h4><span className="font-bold text-brand-blue text-sm">{pro.price}</span></div><p className="text-xs text-gray-500 mb-1">{pro.skill}</p><div className="flex gap-2 text-[10px] text-gray-400"><span className="flex items-center text-yellow-500"><Star size={10} className="fill-current mr-0.5" /> {pro.rating}</span></div></div></div></div>))}</div></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        if (activeTab === 'orders') {
+            return (
+                <div className="flex flex-col h-full bg-gray-50 animate-slide-up">
+                    <div className="bg-white p-4 pt-8 sticky top-0 z-10 border-b border-gray-100 shadow-sm md:px-8">
+                        <h2 className="text-xl font-bold text-gray-800 max-w-4xl mx-auto mb-4">{t('my_orders')}</h2>
+                        <div className="flex gap-4 border-b border-gray-100">
+                            <button onClick={() => setOrderTab('active')} className={`pb-2 text-sm font-bold ${orderTab === 'active' ? 'text-brand-blue border-b-2 border-brand-blue' : 'text-gray-400'}`}>进行中</button>
+                            <button onClick={() => setOrderTab('requests')} className={`pb-2 text-sm font-bold ${orderTab === 'requests' ? 'text-brand-blue border-b-2 border-brand-blue' : 'text-gray-400'}`}>我的需求 ({myRequests.length})</button>
+                            <button onClick={() => setOrderTab('history')} className={`pb-2 text-sm font-bold ${orderTab === 'history' ? 'text-brand-blue border-b-2 border-brand-blue' : 'text-gray-400'}`}>历史</button>
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4 pb-24 max-w-4xl mx-auto w-full">
+                         {orderTab === 'active' && (
+                             <>
+                                <div className="bg-white rounded-2xl shadow-lg border border-blue-100 overflow-hidden mb-8"><div className="bg-brand-blue p-4 text-white flex justify-between items-center"><div><span className="text-xs opacity-80">{t('eta')}</span><div className="font-bold text-2xl">{activeOrder.eta}</div></div><div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm"><Clock size={24} className="animate-pulse" /></div></div><div className="h-32 bg-gray-100 relative"><iframe width="100%" height="100%" frameBorder="0" scrolling="no" marginHeight="0" marginWidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=101.68685913085939%2C3.006931201367338%2C101.72668457031251%2C3.033504907992788&amp;layer=mapnik" className="w-full h-full opacity-60 mix-blend-multiply"></iframe><div className="absolute inset-0 flex items-center justify-center"><span className="bg-white px-3 py-1 rounded-full shadow-md text-xs font-bold text-gray-600 flex items-center gap-1"><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div> {t('moving')}</span></div></div><div className="p-4 border-b border-gray-100 flex items-center justify-between"><div className="flex items-center gap-3"><div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center"><User size={20} className="text-gray-500" /></div><div><h4 className="font-bold text-gray-800">{activeOrder.sifuName}</h4><p className="text-xs text-gray-500">{activeOrder.service}</p></div></div><div className="flex gap-2"><button className="p-2 bg-green-100 text-green-600 rounded-full"><MessageCircle size={20} /></button><button className="p-2 bg-blue-100 text-brand-blue rounded-full"><Phone size={20} /></button></div></div><div className="p-5 bg-gray-50/50"><div className="relative pl-2"><div className="absolute left-[15px] top-2 bottom-4 w-0.5 bg-gray-200"></div>{activeOrder.timeline.map((step, idx) => (<div key={idx} className="flex gap-4 mb-6 relative z-10 last:mb-0"><div className={`w-4 h-4 rounded-full flex-shrink-0 border-2 ${step.done ? 'bg-brand-blue border-brand-blue' : step.current ? 'bg-white border-brand-orange animate-pulse' : 'bg-gray-100 border-gray-300'}`}>{step.done && <CheckCircle size={10} className="text-white m-auto" />}</div><div className={`${step.done || step.current ? 'opacity-100' : 'opacity-40'}`}><p className={`text-sm font-bold ${step.current ? 'text-brand-orange' : 'text-gray-800'}`}>{step.text}</p><p className="text-xs text-gray-500">{step.time}</p></div></div>))}</div></div></div>
+                             </>
+                         )}
+                         {orderTab === 'requests' && (
+                             <div className="space-y-4">
+                                 {myRequests.map(req => (
+                                     <div key={req.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                                         <div className="flex justify-between items-start mb-2">
+                                             <span className="bg-blue-50 text-brand-blue text-[10px] font-bold px-2 py-1 rounded">{req.category}</span>
+                                             <span className="text-[10px] text-gray-400">{req.time}</span>
+                                         </div>
+                                         <h3 className="font-bold text-gray-800 mb-1">{req.title}</h3>
+                                         <p className="text-xs text-gray-500 mb-3">{req.desc}</p>
+                                         <div className="bg-gray-50 p-3 rounded-xl">
+                                             <h4 className="text-xs font-bold text-gray-700 mb-2">师傅报价/留言 ({req.comments.length})</h4>
+                                             {req.comments.length > 0 ? (
+                                                 req.comments.map(c => (
+                                                     <div key={c.id} className="mb-2 last:mb-0 text-xs">
+                                                         <div className="flex justify-between"><span className="font-bold">{c.sifu}</span><span className="text-brand-orange font-bold">{c.priceOffer}</span></div>
+                                                         <p className="text-gray-500">{c.text}</p>
+                                                     </div>
+                                                 ))
+                                             ) : (
+                                                 <p className="text-[10px] text-gray-400">暂时还没有师傅报价，请耐心等待。</p>
+                                             )}
+                                         </div>
+                                     </div>
+                                 ))}
+                                 <button onClick={() => toggleModal('postRequest', true)} className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 font-bold text-sm flex items-center justify-center gap-2 hover:border-brand-blue hover:text-brand-blue transition"><Plus size={16}/> 发布新需求</button>
+                             </div>
+                         )}
+                         {orderTab === 'history' && (
+                             <div className="space-y-3">{pastOrders.map((order) => (<div key={order.id} className="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center border border-gray-100"><div className="flex items-center gap-3"><div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400"><Wrench size={18} /></div><div><h4 className="font-bold text-gray-800 text-sm">{order.sifu}</h4><p className="text-xs text-gray-400">{order.service} • {order.date}</p></div></div><div className="text-right"><div className="font-bold text-gray-800 text-sm">{order.price}</div><div className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full inline-block mt-1">{order.status}</div></div></div>))}</div>
+                         )}
+                    </div>
+                </div>
+            );
+        }
+        // ... (保留 voucher, chat, me tab 的代码) ...
+        if (activeTab === 'voucher') {
+            return (
+                <div className="flex flex-col h-full bg-gray-50 animate-slide-up">
+                    <div className="bg-white p-4 pt-8 sticky top-0 z-10 border-b border-gray-100 shadow-sm flex justify-between items-center md:px-8"><h2 className="text-xl font-bold text-gray-800 max-w-4xl mx-auto">{t('my_vouchers')}</h2><button onClick={() => setShowVoucherRules(true)} className="text-xs text-brand-blue font-bold cursor-pointer hover:bg-blue-50 px-2 py-1 rounded">{t('rules')}</button></div>
+                    <div className="flex-1 overflow-y-auto p-4 pb-24 max-w-4xl mx-auto w-full">
+                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6"><label className="text-xs text-gray-400 font-bold mb-2 block uppercase tracking-wider">{t('enter_code')}</label><div className="flex gap-2"><input type="text" placeholder={t('promo_placeholder')} className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-brand-blue uppercase" /><button className="bg-gray-800 text-white text-xs font-bold px-4 py-2 rounded-lg active:scale-95 transition">{t('redeem')}</button></div></div>
+                        <div className="space-y-4">{vouchersData.map((v) => (<div key={v.id} className="relative flex bg-white rounded-xl shadow-md overflow-hidden min-h-[100px]"><div className={`w-28 bg-gradient-to-br ${v.color} p-3 flex flex-col items-center justify-center text-white relative`}><div className="absolute -right-3 top-1/2 -mt-3 w-6 h-6 bg-gray-50 rounded-full z-10"></div><span className="font-bold text-2xl shadow-sm">{v.value}</span><span className="text-[10px] font-medium opacity-80 tracking-widest">{v.sub}</span></div><div className="flex-1 p-4 flex flex-col justify-between relative"><div className="absolute left-0 top-2 bottom-2 border-l-2 border-dashed border-gray-200"></div><div><h3 className="font-bold text-gray-800">{t(v.title)}</h3><p className="text-xs text-gray-500 mt-1">{t(v.condition)}</p></div><div className="flex justify-between items-end mt-3"><span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-1 rounded">{t(v.expiry)}</span><button className={`text-xs font-bold px-3 py-1.5 rounded-full border ${v.type === 'cash' ? 'text-brand-orange border-brand-orange' : 'text-brand-blue border-brand-blue'}`}>{t('use_now')}</button></div></div></div>))}</div>
+                        <div className="mt-8 text-center"><p className="text-xs text-gray-300">{t('no_more')}</p></div>
+                    </div>
+                </div>
+            );
+        }
+        if (activeTab === 'chat') {
+            return (
+                <div className="flex flex-col h-full bg-gray-50 animate-slide-up">
+                    <div className="bg-white p-4 pt-8 sticky top-0 z-10 border-b border-gray-100 shadow-sm flex justify-between items-center md:px-8"><h2 className="text-xl font-bold text-gray-800 max-w-4xl mx-auto">{t('messages')} (3)</h2><button className="text-brand-blue"><MoreVertical size={20} /></button></div>
+                    <div className="flex-1 overflow-y-auto p-4 pb-24 max-w-4xl mx-auto w-full">
+                        <div className="mb-4 relative"><input type="text" placeholder={t('search_contact')} className="w-full bg-white border border-gray-200 py-2 pl-9 pr-4 rounded-lg text-sm focus:outline-none focus:border-brand-blue" /><Search size={16} className="absolute left-3 top-2.5 text-gray-400" /></div>
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">{chatList.map((chat) => (<div key={chat.id} onClick={() => setActiveChat(chat)} className="flex items-center p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition cursor-pointer"><div className={`w-12 h-12 rounded-full flex items-center justify-center mr-3 flex-shrink-0 ${chat.bg}`}>{chat.avatar}</div><div className="flex-1 min-w-0"><div className="flex justify-between items-baseline mb-1"><h4 className="font-bold text-gray-800 text-sm truncate">{chat.name}</h4><span className="text-[10px] text-gray-400">{chat.time}</span></div><p className="text-xs text-gray-500 truncate">{chat.lastMsg}</p></div>{chat.unread > 0 && (<div className="ml-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">{chat.unread}</div>)}</div>))}</div>
+                    </div>
+                </div>
+            );
+        }
+        if (activeTab === 'me') {
+            return (
+                <div className="flex flex-col h-full bg-gray-50 animate-slide-up relative">
+                    <div className="flex-1 overflow-y-auto pb-24 no-scrollbar">
+                        <div className="bg-brand-blue p-6 pb-12 rounded-b-[2rem] md:rounded-none md:pb-20">
+                            <div className="flex items-center gap-4 text-white max-w-4xl mx-auto">
+                                <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/50 flex items-center justify-center text-2xl font-bold backdrop-blur-sm overflow-hidden cursor-pointer" onClick={() => toggleModal('profile', true)}>{userProfile.avatar ? <img src={userProfile.avatar} className="w-full h-full object-cover" /> : "A"}</div>
+                                <div><h2 className="font-bold text-xl">{userProfile.name}</h2><p className="text-blue-100 text-sm mb-1">{userProfile.phone}</p><span className="inline-block bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">{t('gold_member')}</span></div>
+                                <button onClick={() => toggleModal('profile', true)} className="ml-auto p-2 bg-white/10 rounded-full hover:bg-white/20 transition"><Settings size={20} /></button>
+                            </div>
+                        </div>
+                        <div className="px-4 max-w-4xl mx-auto w-full">
+                            <div className="bg-white rounded-2xl shadow-xl p-5 -mt-8 relative z-10 flex justify-between items-center mb-6 border border-gray-100">
+                                <div><p className="text-xs text-gray-400 font-medium mb-1">{t('balance')}</p><h3 className="text-2xl font-bold text-gray-800">RM 120.50</h3></div>
+                                <div className="flex gap-3"><button onClick={() => toggleModal('topup', true)} className="flex flex-col items-center gap-1 group"><div className="w-10 h-10 bg-blue-50 text-brand-blue rounded-full flex items-center justify-center group-hover:bg-brand-blue group-hover:text-white transition shadow-sm"><Plus size={20} /></div><span className="text-[10px] text-gray-500 font-medium">{t('topup')}</span></button><button onClick={() => toggleModal('withdraw', true)} className="flex flex-col items-center gap-1 group"><div className="w-10 h-10 bg-orange-50 text-brand-orange rounded-full flex items-center justify-center group-hover:bg-brand-orange group-hover:text-white transition shadow-sm"><Wallet size={18} /></div><span className="text-[10px] text-gray-500 font-medium">{t('withdraw')}</span></button></div>
+                            </div>
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+                                <div onClick={() => toggleModal('address', true)} className="flex items-center p-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition"><div className="w-8 h-8 rounded-full bg-blue-50 text-brand-blue flex items-center justify-center mr-3"><MapPin size={16} /></div><div className="flex-1"><h4 className="text-sm font-medium text-gray-700">{t('my_address')}</h4></div><span className="text-xs text-gray-400 mr-2">{t('set_default')}</span><ChevronRight size={16} className="text-gray-300" /></div>
+                                <div onClick={() => toggleModal('payment', true)} className="flex items-center p-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition"><div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mr-3"><CreditCard size={16} /></div><div className="flex-1"><h4 className="text-sm font-medium text-gray-700">{t('payment_method')}</h4></div><span className="text-xs text-gray-400 mr-2">{cardList.length} 张卡</span><ChevronRight size={16} className="text-gray-300" /></div>
+                                <div onClick={() => toggleModal('language', true)} className="flex items-center p-4 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition"><div className="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center mr-3"><Globe size={16} /></div><div className="flex-1"><h4 className="text-sm font-medium text-gray-700">{t('language')}</h4></div><span className="text-xs text-gray-400 mr-2">{lang === 'zh' ? '中文' : lang === 'en' ? 'EN' : 'MS'}</span><ChevronRight size={16} className="text-gray-300" /></div>
+                            </div>
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"><div onClick={() => toggleModal('help', true)} className="flex items-center p-4 border-b border-gray-50 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition"><div className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center mr-3"><HelpCircle size={16} /></div><div className="flex-1"><h4 className="text-sm font-medium text-gray-700">{t('help_center')}</h4></div><ChevronRight size={16} className="text-gray-300" /></div><div onClick={() => toggleModal('logout', true)} className="flex items-center p-4 cursor-pointer hover:bg-gray-50 transition"><div className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center mr-3"><LogOut size={16} /></div><div className="flex-1"><h4 className="text-sm font-medium text-red-500">{t('logout')}</h4></div></div></div>
+                            <div className="h-8"></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
+
+    return (
+        <div className="flex flex-col h-screen bg-gray-50 font-sans w-full mx-auto shadow-2xl overflow-hidden relative">
+            <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden">
+                {/* Desktop Side Nav */}
+                <div className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 z-30">
+                    <div className="p-6 text-brand-blue font-bold text-2xl flex items-center gap-2"><Wrench/> Sifu-Go</div>
+                    <div className="flex-1 px-4 space-y-2">
+                        {[{ id: 'find', l: '首页', i: <Search size={20} /> }, { id: 'orders', l: '订单', i: <Clock size={20} /> }, { id: 'voucher', l: '优惠券', i: <Ticket size={20} /> }, { id: 'chat', l: '消息', i: <MessageCircle size={20} /> }, { id: 'me', l: '我的', i: <User size={20} /> }].map(n => (
+                            <button key={n.id} onClick={() => {
+                                setActiveTab(n.id);
+                                if(n.id === 'find') {
+                                    setSelectedCategory(null); // 修复：点击首页时关闭分类弹窗
+                                    setSosState('idle'); 
+                                }
+                            }} className={`w-full flex items-center gap-3 p-3 rounded-xl transition ${activeTab === n.id ? 'bg-brand-blue text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'}`}>
+                                {n.i} <span>{n.l}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Main Viewport */}
+                <div className="flex-1 relative h-full overflow-hidden">
+                     {renderContent()}
+                </div>
+            </div>
+
+            {/* Overlays */}
+            {renderSOSModal()}
+            {/* ... (保留 voucherRules 等) ... */}
+            {/* ... (保留 common modals) ... */}
+            
+            {/* 新增: 发布需求 Modal */}
+            {modals.postRequest && (
+                <div className="absolute inset-0 z-50 bg-black/50 flex flex-col items-center justify-end md:justify-center p-0 md:p-6 animate-fade-in">
+                    <div className="bg-white rounded-t-3xl md:rounded-2xl w-full max-w-md shadow-2xl p-6 animate-slide-up h-[85vh] md:h-auto overflow-y-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="font-bold text-xl text-gray-800">发布需求</h3>
+                            <button onClick={() => toggleModal('postRequest', false)}><X size={24} className="text-gray-400"/></button>
+                        </div>
+                        <div className="space-y-4 mb-6">
+                            <div>
+                                <label className="text-xs font-bold text-gray-500 mb-1 block">服务分类</label>
+                                <select value={newRequest.cat} onChange={e => setNewRequest({...newRequest, cat: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-blue">
+                                    <option>房屋修缮</option><option>冷气服务</option><option>水电维修</option><option>清洁服务</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-500 mb-1 block">标题 (例如: 马桶堵塞)</label>
+                                <input type="text" value={newRequest.title} onChange={e => setNewRequest({...newRequest, title: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-blue" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-500 mb-1 block">详细描述状况</label>
+                                <textarea value={newRequest.desc} onChange={e => setNewRequest({...newRequest, desc: e.target.value})} className="w-full h-24 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-blue resize-none"></textarea>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-500 mb-1 block">上传照片 (方便师傅报价)</label>
+                                <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                                    <Image size={32} className="mb-2"/>
+                                    <span className="text-xs">点击上传照片</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onClick={handleSubmitRequest} className="w-full bg-brand-blue text-white font-bold py-4 rounded-xl shadow-lg">发布需求</button>
+                    </div>
+                </div>
+            )}
+            
+            {/* ... (保留 More Menu, Sifu Detail, Active Chat, Category Filter, Bottom Nav) ... */}
+            {/* Common Modals */}
+            {modals.profile && (<div className="absolute inset-0 z-50 bg-black/50 flex items-center justify-center p-6 animate-fade-in"><div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 animate-scale-up"><h3 className="font-bold text-lg mb-4">{t('edit_profile')}</h3><div className="flex flex-col items-center mb-6"><div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden mb-2 relative group cursor-pointer flex justify-center items-center" onClick={() => fileInputRef.current.click()}>{userProfile.avatar ? <img src={userProfile.avatar} className="w-full h-full object-cover" /> : "A"}<div className="absolute inset-0 bg-black/30 hidden group-hover:flex items-center justify-center text-white"><Camera size={20} /></div></div><span className="text-xs text-brand-blue font-bold cursor-pointer" onClick={() => fileInputRef.current.click()}>{t('upload_photo')}</span><input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} /></div><input type="text" value={userProfile.name} onChange={(e) => setUserProfile({ ...userProfile, name: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3" /><input type="text" value={userProfile.phone} onChange={(e) => setUserProfile({ ...userProfile, phone: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 mb-6" /><div className="flex gap-3"><button onClick={() => toggleModal('profile', false)} className="flex-1 py-2 text-gray-500 font-bold text-sm bg-gray-100 rounded-lg">{t('cancel')}</button><button onClick={() => toggleModal('profile', false)} className="flex-1 py-2 bg-brand-blue text-white rounded-lg font-bold text-sm shadow-md">{t('save')}</button></div></div></div>)}
+            {modals.address && (<div className="absolute inset-0 z-50 bg-gray-50 flex flex-col animate-slide-up md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[400px] md:h-[600px] md:rounded-2xl md:shadow-2xl md:border md:bg-white"><div className="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-10"><button onClick={() => toggleModal('address', false)}><ChevronLeft /></button><h3 className="font-bold text-lg">{t('my_address')}</h3></div><div className="p-4 space-y-3 flex-1 overflow-y-auto">{addressList.map(addr => (<div key={addr.id} onClick={() => handleSetDefaultAddress(addr.id)} className={`bg-white p-4 rounded-xl shadow-sm border-2 relative cursor-pointer transition ${addr.isDefault ? 'border-brand-blue bg-blue-50/30' : 'border-transparent hover:border-gray-200'}`}><div className="flex justify-between items-start mb-2"><span className={`text-[10px] font-bold px-2 py-0.5 rounded ${addr.isDefault ? 'bg-brand-blue text-white' : 'bg-gray-100 text-gray-500'}`}>{addr.label} {addr.isDefault && `(${t('default')})`}</span><div className="flex items-center gap-2"><button onClick={(e) => handleDeleteAddress(addr.id, e)} className="text-gray-300 hover:text-red-500 transition p-1"><Trash2 size={16} /></button>{addr.isDefault && <CheckCircle size={16} className="text-brand-blue" />}</div></div><p className="text-sm font-bold text-gray-800 leading-snug">{addr.address}</p></div>))}<button onClick={() => toggleModal('addAddress', true)} className="w-full border-2 border-dashed border-gray-300 rounded-xl py-3 text-gray-400 font-bold text-sm mt-4 flex items-center justify-center gap-2 hover:border-brand-blue hover:text-brand-blue transition"><Plus size={16} /> {t('add_address')}</button><div className="h-20"></div></div></div>)}
+            {modals.addAddress && (<div className="absolute inset-0 z-[60] bg-black/50 flex items-center justify-center p-6 animate-fade-in"><div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 animate-scale-up"><h3 className="font-bold text-lg mb-4">{t('add_address')}</h3><div className="flex gap-2 mb-4">{['Home', 'Office', 'Other'].map(label => (<button key={label} onClick={() => setNewAddr({ ...newAddr, label })} className={`flex-1 py-1.5 text-xs font-bold rounded border ${newAddr.label === label ? 'bg-brand-blue text-white border-brand-blue' : 'border-gray-200 text-gray-500'}`}>{label}</button>))}</div><textarea placeholder="输入详细地址..." value={newAddr.detail} onChange={e => setNewAddr({ ...newAddr, detail: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm h-24 resize-none bg-gray-50 focus:bg-white mb-6"></textarea><div className="flex gap-3"><button onClick={() => toggleModal('addAddress', false)} className="flex-1 py-2 text-gray-500 font-bold text-sm bg-gray-100 rounded-lg">{t('cancel')}</button><button onClick={handleAddAddress} className="flex-1 py-2 bg-brand-blue text-white rounded-lg font-bold text-sm shadow-md">{t('save')}</button></div></div></div>)}
+            {modals.payment && (<div className="absolute inset-0 z-50 bg-gray-50 flex flex-col animate-slide-up md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[400px] md:h-[600px] md:rounded-2xl md:shadow-2xl md:border md:bg-white"><div className="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-10"><button onClick={() => toggleModal('payment', false)}><ChevronLeft /></button><h3 className="font-bold text-lg">{t('payment_method')}</h3></div><div className="p-4 space-y-3 flex-1 overflow-y-auto">{cardList.map(card => (<div key={card.id} className={`p-5 rounded-2xl shadow-lg relative overflow-hidden mb-2 ${card.type === 'visa' ? 'bg-gradient-to-r from-gray-800 to-gray-900 text-white' : 'bg-blue-500 text-white'}`}><div className="absolute right-0 top-0 w-20 h-20 bg-white/10 rounded-full -mr-5 -mt-5"></div><p className="text-xs opacity-70 mb-4">{card.brand}</p><p className="text-xl font-mono tracking-widest mb-4">{card.number}</p><div className="flex justify-between items-end"><span className="text-xs opacity-70">EXP {card.expiry}</span></div></div>))}<button onClick={() => toggleModal('addCard', true)} className="w-full border-2 border-dashed border-gray-300 rounded-xl py-3 text-gray-400 font-bold text-sm mt-4 flex items-center justify-center gap-2 hover:border-brand-blue hover:text-brand-blue transition"><Plus size={16} /> {t('bind_card')}</button><div className="h-20"></div></div></div>)}
+            {modals.addCard && (<div className="absolute inset-0 z-[60] bg-black/50 flex items-center justify-center p-6 animate-fade-in"><div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 animate-scale-up"><h3 className="font-bold text-lg mb-4">{t('bind_card')}</h3><input type="text" placeholder="卡号" value={newCard.no} onChange={e => setNewCard({ ...newCard, no: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3" /><div className="flex gap-3 mb-3"><input type="text" placeholder="MM/YY" value={newCard.expiry} onChange={e => setNewCard({ ...newCard, expiry: e.target.value })} className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm" /><input type="text" placeholder="CVV" value={newCard.cvv} onChange={e => setNewCard({ ...newCard, cvv: e.target.value })} className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm" /></div><div className="flex gap-3 mt-6"><button onClick={() => toggleModal('addCard', false)} className="flex-1 py-2 text-gray-500 font-bold text-sm bg-gray-100 rounded-lg">{t('cancel')}</button><button onClick={handleAddCard} className="flex-1 py-2 bg-brand-blue text-white rounded-lg font-bold text-sm shadow-md">{t('save')}</button></div></div></div>)}
+            {modals.help && (<div className="absolute inset-0 z-50 bg-gray-50 flex flex-col animate-slide-up md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[400px] md:h-[600px] md:rounded-2xl md:shadow-2xl md:border md:bg-white"><div className="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-10"><button onClick={() => toggleModal('help', false)}><ChevronLeft /></button><h3 className="font-bold text-lg">{t('help_center')}</h3></div><div className="p-4 flex-1 overflow-y-auto"><h4 className="font-bold text-gray-800 mb-3">{t('faq')}</h4><div className="space-y-3">{[{ q: "如何预约 Sifu?", a: "在首页选择服务类型，浏览师傅列表，点击'立即预约'即可。" },{ q: "收费标准是怎样的?", a: "所有服务均有起步价。具体价格由师傅上门检测后报价，您同意后才开始工作。" },{ q: "如何申请退款?", a: "如果服务未完成或有争议，请在订单页面点击'联系客服'，我们会介入处理。" },{ q: "怎样成为 Sifu?", a: "请下载 'Sifu-Pro' 版本的 App 进行注册和技能认证。" }].map((item, i) => (<div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"><div onClick={() => setExpandedFaq(expandedFaq === i ? null : i)} className="p-4 flex justify-between items-center cursor-pointer bg-white"><span className="text-sm text-gray-700 font-medium">{t(item.q)}</span><ChevronDown size={16} className={`text-gray-300 transition-transform ${expandedFaq === i ? 'rotate-180' : ''}`} /></div>{expandedFaq === i && <div className="px-4 pb-4 text-xs text-gray-500 bg-gray-50/50 leading-relaxed border-t border-gray-50 pt-2">{t(item.a)}</div>}</div>))}</div><button className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl shadow-lg mt-8 flex items-center justify-center gap-2"><Headphones size={18} /> {t('contact_support')}</button><div className="h-20"></div></div></div>)}
+            {['topup', 'withdraw', 'language', 'logout'].map(m => modals[m] && (<div key={m} className={`absolute inset-0 z-50 bg-black/50 ${m === 'logout' ? 'flex items-center justify-center p-6' : 'flex items-end md:items-center md:justify-center'} animate-fade-in`}>{m === 'logout' ? (<div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 text-center animate-scale-up"><div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4"><LogOut size={24} /></div><h3 className="font-bold text-lg text-gray-800 mb-2">{t('confirm_logout')}</h3><p className="text-xs text-gray-500 mb-6">{t('logout_desc')}</p><div className="flex gap-3"><button onClick={() => toggleModal('logout', false)} className="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-bold text-sm">{t('cancel')}</button><button onClick={handleLogout} className="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-bold text-sm shadow-md">{t('logout')}</button></div></div>) : (<div className="bg-white rounded-t-3xl w-full p-6 pb-[100px] animate-slide-up md:rounded-2xl md:w-[400px] md:pb-6 md:shadow-2xl"><div className="flex justify-between items-center mb-6"><h3 className="font-bold text-lg">{m === 'topup' ? t('topup') : m === 'withdraw' ? t('withdraw') : t('language')}</h3><button onClick={() => toggleModal(m, false)}><X size={20} className="text-gray-400" /></button></div>{m === 'language' ? (<div className="space-y-1">{[{ c: 'ms', l: 'Bahasa Melayu' }, { c: 'en', l: 'English' }, { c: 'zh', l: '中文 (简体)' }].map(x => (<div key={x.c} onClick={() => { setLang(x.c); toggleModal('language', false); }} className={`p-4 rounded-xl flex justify-between items-center cursor-pointer ${lang === x.c ? 'bg-blue-50 border border-blue-100' : 'hover:bg-gray-50'}`}><span className={`text-sm font-medium ${lang === x.c ? 'text-brand-blue' : 'text-gray-700'}`}>{x.l}</span>{lang === x.c && <CheckCircle size={18} className="text-brand-blue" />}</div>))}</div>) : (<>{m === 'withdraw' && <div className="bg-gray-50 p-4 rounded-xl mb-4 flex justify-between items-center"><span className="text-sm text-gray-600">{t('avail_balance')}</span><span className="font-bold text-gray-800">RM 120.50</span></div>}<p className="text-xs text-gray-400 mb-2">{t('amount')}</p><input type="number" placeholder="0.00" className={`w-full text-3xl font-bold border-b border-gray-200 py-2 mb-6 focus:outline-none focus:border-${m === 'withdraw' ? 'brand-orange' : 'brand-blue'}`} />{m === 'topup' && <div className="grid grid-cols-3 gap-3 mb-6">{[20, 50, 100].map(a => <button key={a} className="border border-gray-200 rounded-xl py-2 text-sm font-medium hover:border-brand-blue text-gray-600">RM {a}</button>)}</div>}<button onClick={() => toggleModal(m, false)} className={`w-full text-white font-bold py-3 rounded-xl shadow-lg ${m === 'withdraw' ? 'bg-brand-orange' : 'bg-brand-blue'}`}>{t('confirm')}</button></>)}</div>)}</div>))}
+            
+            {/* More Menu Modal */}
+            {showMoreMenu && (
+                <div className="absolute inset-0 z-50 flex items-end md:items-center md:justify-center">
+                    <div className="absolute inset-0 bg-black/40 transition-opacity" onClick={() => setShowMoreMenu(false)}></div>
+                    <div className="w-full bg-white rounded-t-3xl p-6 shadow-2xl relative animate-slide-up md:rounded-2xl md:w-[600px] md:h-auto">
+                        <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 md:hidden"></div>
+                        <div className="flex justify-between items-center mb-6"><h3 className="font-bold text-lg text-gray-800">{t('more_services')}</h3><button onClick={() => setShowMoreMenu(false)} className="p-1 bg-gray-100 rounded-full"><X size={20} className="text-gray-500" /></button></div>
+                        <div className="grid grid-cols-4 gap-y-6">{moreServices.map((s, i) => (<div key={i} onClick={() => handleCategoryClick(s.type, s.label)} className="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition"><div className="w-12 h-12 p-2.5 bg-gray-50 rounded-2xl flex items-center justify-center text-xl shadow-sm border border-gray-100"><img src={s.icon} alt={t(s.label)} className="w-full h-full object-contain" /></div><span className="text-center text-xs text-gray-600 font-medium">{t(s.label)}</span></div>))}</div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Sifu Detail Overlay (Fixed z-[100] to cover everything) */}
+            {selectedSifu && (
+                <div className="fixed inset-0 z-[100] bg-white flex flex-col animate-slide-up md:fixed md:inset-0 md:bg-black/50 md:flex md:items-center md:justify-center">
+                    <div className="flex flex-col h-full w-full bg-white md:w-[500px] md:h-[600px] md:rounded-2xl md:shadow-2xl md:overflow-hidden relative">
+                        <div className="p-4 flex items-center border-b border-gray-100 sticky top-0 bg-white z-10"><button onClick={() => setSelectedSifu(null)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-200 transition"><ChevronLeft size={24} className="text-gray-700" /></button><span className="ml-4 font-bold text-lg">{t('sifu_desc') || "师傅简介"}</span></div>
+                        <div className="flex-1 overflow-y-auto pb-20 p-6">
+                            <div className="text-center mb-6"><div className="w-24 h-24 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-4 border-4 border-white shadow-lg"><Shield size={40} className="text-brand-blue" /></div><h2 className="text-2xl font-bold text-gray-800">{selectedSifu.name}</h2><p className="text-gray-500">{selectedSifu.skill}</p></div>
+                            <div className="flex justify-center gap-6 bg-gray-50 p-4 rounded-2xl mb-6"><div className="text-center"><span className="block font-bold text-xl text-brand-blue">{selectedSifu.rating}</span><span className="text-xs text-gray-400">评分</span></div><div className="w-px bg-gray-200"></div><div className="text-center"><span className="block font-bold text-xl text-brand-blue">{selectedSifu.jobs}</span><span className="text-xs text-gray-400">接单</span></div></div>
+                            <h3 className="font-bold text-lg mb-2">关于我</h3><p className="text-gray-600 text-sm leading-relaxed mb-6">{selectedSifu.bio}</p>
+                        </div>
+                        <div className="p-4 border-t border-gray-100 flex gap-3 bg-white"><button className="flex-1 bg-brand-orange text-white font-bold py-3 rounded-xl shadow-lg">立即预约 ({selectedSifu.price})</button></div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Active Chat Detail (Fixed z-[100]) */}
+            {activeChat && (
+                <div className="fixed inset-0 z-[100] bg-white flex flex-col animate-slide-up md:fixed md:inset-0 md:bg-black/50 md:flex md:items-center md:justify-center">
+                    <div className="flex flex-col h-full w-full bg-white md:w-[500px] md:h-[600px] md:rounded-2xl md:shadow-2xl md:overflow-hidden relative">
+                        <div className="bg-white p-4 pt-8 sticky top-0 z-10 border-b border-gray-100 shadow-sm flex items-center gap-3"><button onClick={() => setActiveChat(null)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100"><ChevronLeft size={20} /></button><div className="flex-1"><h2 className="font-bold text-gray-800 text-sm">{activeChat.name}</h2><p className="text-[10px] text-green-500 flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> {t('online')}</p></div><button className="p-2 hover:bg-gray-50 rounded-full"><Phone size={20} className="text-brand-blue" /></button></div>
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"><div className="text-center text-xs text-gray-400 my-4">今天 14:30</div>{chatHistoryMock.map((msg) => (<div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>{msg.sender === 'sifu' && (<div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2 text-gray-500"><User size={14} /></div>)}<div className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm shadow-sm ${msg.sender === 'me' ? 'bg-brand-blue text-white rounded-tr-none' : 'bg-white text-gray-700 rounded-tl-none'}`}>{msg.text}<div className={`text-[10px] mt-1 text-right ${msg.sender === 'me' ? 'text-blue-200' : 'text-gray-300'}`}>{msg.time}</div></div></div>))}</div>
+                        <div className="p-4 bg-white border-t border-gray-100 flex gap-2"><input type="text" placeholder={t('type_msg')} className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-4 text-sm focus:outline-none focus:border-brand-blue" /><button className="p-3 bg-brand-blue text-white rounded-full shadow-lg active:scale-95 transition"><Send size={18} /></button></div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Category Filter Sifu List (Fixed z-[90]) */}
+            {selectedCategory && (
+                <div className="fixed inset-0 z-[90] bg-gray-50 flex flex-col animate-slide-up md:fixed md:inset-0 md:left-64 md:z-0 md:bg-gray-50 md:h-full">
+                    <div className="bg-white p-4 pt-8 sticky top-0 z-10 border-b border-gray-100 shadow-sm flex items-center gap-3"><button onClick={() => setSelectedCategory(null)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100"><ChevronLeft size={20} /></button><div className="flex-1"><h2 className="font-bold text-gray-800 text-lg">{t(selectedCategory.label)}</h2><p className="text-xs text-gray-400">推荐师傅列表</p></div><button className="p-2 hover:bg-gray-50 rounded-full"><Filter size={20} className="text-gray-500" /></button></div>
+                    <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-24 md:pb-0">{sifuData.filter(s => s.category === selectedCategory.type).length > 0 ? (sifuData.filter(s => s.category === selectedCategory.type).map((pro) => (<div key={pro.id} onClick={() => setSelectedSifu(pro)} className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 active:bg-gray-50 transition cursor-pointer group animate-fade-in"><div className="flex items-start"><div className="w-14 h-14 bg-gray-50 rounded-lg mr-3 flex-shrink-0 flex items-center justify-center text-gray-400"><Key size={24} /></div><div className="flex-1"><div className="flex justify-between"><h4 className="font-bold text-gray-800 text-sm">{pro.name}</h4><span className="font-bold text-brand-blue text-sm">{pro.price}</span></div><p className="text-xs text-gray-500 mb-1">{pro.skill}</p><div className="flex gap-2 text-[10px] text-gray-400"><span className="flex items-center text-yellow-500"><Star size={10} className="fill-current mr-0.5" /> {pro.rating}</span><span className="flex items-center">{pro.dist}</span></div></div><div className="self-center pl-2"><ChevronRight size={20} className="text-gray-300 group-hover:text-brand-blue transition" /></div></div></div>))) : (<div className="flex flex-col items-center justify-center h-64 text-gray-400"><div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4"><Search size={32}/></div><p className="text-sm">暂时没有这个分类的师傅</p></div>)}</div>
+                </div>
+            )}
+            
+            {/* Mobile Bottom Nav */}
+            <div className="md:hidden absolute bottom-0 w-full bg-white border-t border-gray-200 py-2 px-4 flex justify-between items-center z-20">
+                {[{ id: 'find', l: 'nav_find', i: <Search size={22} /> }, { id: 'orders', l: 'nav_orders', i: <Clock size={22} /> }, { id: 'voucher', l: 'nav_voucher', i: <Ticket size={22} /> }, { id: 'chat', l: 'nav_chat', i: <MessageCircle size={22} /> }, { id: 'me', l: 'nav_me', i: <User size={22} /> }].map(n => (
+                  <div key={n.id} onClick={() => setActiveTab(n.id)} className={`flex flex-col items-center w-1/5 cursor-pointer transition-colors duration-200 ${activeTab === n.id ? 'text-brand-blue' : 'text-gray-300'}`}>
+                    {n.i}<span className="text-[10px] font-medium mt-1">{t(n.l)}</span>
+                  </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export default App;
