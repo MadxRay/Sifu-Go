@@ -198,7 +198,7 @@ const AuthScreen = ({ onLogin }) => {
                 {/* Desktop Right */}
                 <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white/5 backdrop-blur-sm md:bg-white md:text-gray-800">
                     <div className="w-full max-w-sm space-y-4">
-                        <button onClick={() => { setRole('user'); setStep('login'); }} className="w-full bg-white text-brand-blue font-bold py-4 rounded-xl shadow-lg active:scale-95 transition md:bg-brand-blue md:text-white">我是用户 (找师傅)</button>
+                        <button onClick={() => { setRole('user'); setStep('login'); }} className="w-full bg-white text-brand-blue font-bold py-4 rounded-xl shadow-lg active:scale-95 transition md:bg-brand-blue md:text-white">我是用户 (找师傅) ***</button>
                         <button onClick={() => { setRole('sifu'); setStep('login'); }} className="w-full bg-brand-orange text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2"><Briefcase size={20} /> 我是师傅 (接单)</button>
                     </div>
                     <div className="p-4 text-center text-xs text-blue-200 md:text-gray-400 mt-4">Version 1.2.0</div>
