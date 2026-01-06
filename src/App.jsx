@@ -207,6 +207,11 @@ const SifuDashboard = ({ onLogout }) => {
     const [jobStep, setJobStep] = useState(0); 
     const [showChat, setShowChat] = useState(false); 
 	const [jobFilter, setJobFilter] = useState('today');
+    
+    // 需求广场逻辑
+    const [requestList, setRequestList] = useState(initialUserRequests);
+    const [selectedRequest, setSelectedRequest] = useState(null); 
+    const [replyText, setReplyText] = useState("");
 	
 	// ==========================================
 	// 新增: 钱包模拟数据
@@ -221,11 +226,6 @@ const SifuDashboard = ({ onLogout }) => {
 	];
 
 	const weeklyEarnings = [40, 80, 20, 150, 100, 200, 120]; // 模拟一周收入数据用于图表
-    
-    // 需求广场逻辑
-    const [requestList, setRequestList] = useState(initialUserRequests);
-    const [selectedRequest, setSelectedRequest] = useState(null); 
-    const [replyText, setReplyText] = useState("");
 
     const steps = ["已接单", "前往中", "工作中", "已完成"];
 
@@ -583,8 +583,15 @@ const SifuDashboard = ({ onLogout }) => {
                 )}
                 {activeTab !== 'home' && activeTab !== 'community' && activeTab !== 'jobs' && activeTab !== 'wallet' && activeTab !== 'profile' && (<div className="flex items-center justify-center h-full text-gray-500">开发中...</div>)}
                 {selectedRequest && renderRequestDetailModal()}
-                <div className="md:hidden absolute bottom-0 w-full bg-gray-800 border-t border-gray-700 py-3 px-6 flex justify-between items-center z-20">{[{ id: 'home', l: '接单', i: <Briefcase size={22} /> }, { id: 'jobs', l: '任务', i: <Clock size={22} /> }, { id: 'community', l: '社区', i: <Users size={22} /> }, { id: 'wallet', l: '钱包', i: <Wallet size={22} /> }, { id: 'profile', l: '我的', i: <User size={22} /> }].map(n => (<div key={n.id} onClick={() => n.id === 'profile' ? onLogout() : setActiveTab(n.id)} className={`flex flex-col items-center cursor-pointer ${activeTab === n.id ? 'text-brand-orange' : 'text-gray-500'}`}>{n.i}<span className="text-[10px] font-medium mt-1">{n.l}</span></div>))}</div>
+                <div className="md:hidden absolute bottom-0 w-full bg-gray-800 border-t border-gray-700 py-3 px-6 flex justify-between items-center z-20">
+                    {[{ id: 'home', l: '接单', i: <Briefcase size={22} /> }, { id: 'jobs', l: '任务', i: <Clock size={22} /> }, { id: 'community', l: '社区', i: <Users size={22} /> }, { id: 'wallet', l: '钱包', i: <Wallet size={22} /> }, { id: 'profile', l: '我的', i: <User size={22} /> }].map(n => (
+                        <div key={n.id} onClick={() => setActiveTab(n.id)} className={`flex flex-col items-center cursor-pointer ${activeTab === n.id ? 'text-brand-orange' : 'text-gray-500'}`}>
+                            {n.i}<span className="text-[10px] font-medium mt-1">{n.l}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
+				
         </div>
     );
 };
@@ -593,6 +600,34 @@ const SifuDashboard = ({ onLogout }) => {
 // 5. 主组件: App (用户端更新)
 // ==========================================
 const App = () => {
+	// --- 🟢 新增：强制禁止缩放逻辑 (Anti-Zoom Logic) ---
+    useEffect(() => {
+        // 1. 禁止双指捏合缩放 (Pinch to Zoom)
+        const handleTouchMove = (e) => {
+            if (e.touches.length > 1) {
+                e.preventDefault(); // 阻止默认的双指缩放
+            }
+        };
+
+        // 2. 禁止双击缩放 (Double Tap to Zoom)
+        let lastTouchEnd = 0;
+        const handleTouchEnd = (e) => {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault(); // 如果两次点击间隔小于300ms，阻止默认行为（放大）
+            }
+            lastTouchEnd = now;
+        };
+
+        // 添加监听器 (注意 passive: false 是必须的，否则无法拦截)
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        return () => {
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, []);
     // ... (保留之前的 state) ...
     // 核心
     const [isLoggedIn, setIsLoggedIn] = useState(false);
