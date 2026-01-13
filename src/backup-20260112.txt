@@ -143,90 +143,8 @@ const communityPosts = [
 
 // 用户需求广场数据
 const initialUserRequests = [
-  { 
-    id: 1, 
-    user: "Alex Tan", 
-    avatar: null, 
-    category: "冷气服务", 
-    title: "两台 Daikin 冷气不冷了", 
-    desc: "开了16度还是感觉像送风，而且出风口有点漏水，需要清洗和检查 gas。客厅和主卧的冷气都有这个问题，已经用了3年多。", 
-    photos: ["https://images.unsplash.com/photo-1545259741-2ea3ebf61fa3?auto=format&fit=crop&w=400&q=80"], 
-    dist: "1.2km", 
-    address: "No.123, Jalan Kenari 5, Taman Equine, 43300 Seri Kembangan, Selangor", 
-    scheduledDate: "2026-01-14",
-    scheduledTime: "14:00",
-    time: "10分钟前", 
-    status: "open", 
-    comments: [
-      { 
-        id: 101, 
-        sifu: "王师傅 (冷气专家)", 
-        avatar: "王",
-        rating: 4.9,
-        completedJobs: 128,
-        text: "老板，这个情况应该是要做 Chemical wash 了。普通洗 RM100，药水洗 RM150。我可以明天下午过去检查。", 
-        time: "5分钟前", 
-        priceOffer: "RM 150" 
-      },
-      { 
-        id: 102, 
-        sifu: "Ah Seng (专业冷气)", 
-        avatar: "S",
-        rating: 4.7,
-        completedJobs: 85,
-        text: "I can check for you tomorrow morning. Gas topup might be needed too. Total around RM130-180.", 
-        time: "8分钟前", 
-        priceOffer: "RM 130" 
-      },
-      { 
-        id: 103, 
-        sifu: "Cool Air Services", 
-        avatar: "C",
-        rating: 4.8,
-        completedJobs: 210,
-        text: "专业团队，提供一年保养。包括拆机清洗、加gas、检查所有部件。", 
-        time: "12分钟前", 
-        priceOffer: "RM 200" 
-      }
-    ] 
-  },
-  { 
-    id: 2, 
-    user: "Alex Tan", 
-    avatar: null, 
-    category: "房屋修缮", 
-    title: "厨房洗手盆下面漏水", 
-    desc: "应该是水管老化了，整个柜子都湿了。需要换新的水管。漏水已经有一周了，越来越严重。", 
-    photos: ["https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=400&q=80"], 
-    dist: "3.5km", 
-    address: "No.88, Jalan 2/3, Puchong Jaya, 47100 Puchong, Selangor",
-    scheduledDate: "2026-01-13",
-    scheduledTime: "09:00",
-    time: "2小时前", 
-    status: "open", 
-    comments: [
-      { 
-        id: 201, 
-        sifu: "Ali 水管师傅", 
-        avatar: "A",
-        rating: 4.6,
-        completedJobs: 156,
-        text: "可以明天早上去检查。如果是普通PVC管 RM80，如果要换铜管会贵一点 RM120。", 
-        time: "1小时前", 
-        priceOffer: "RM 80" 
-      },
-      { 
-        id: 202, 
-        sifu: "Professional Plumber", 
-        avatar: "P",
-        rating: 4.8,
-        completedJobs: 95,
-        text: "Free inspection first. Will provide detailed quote after checking. Usually RM60-150 depending on pipe type.", 
-        time: "1.5小时前", 
-        priceOffer: "免费检查" 
-      }
-    ] 
-  }
+  { id: 1, user: "Mdm. Lee", avatar: null, category: "冷气服务", title: "两台 Daikin 冷气不冷了", desc: "开了16度还是感觉像送风，而且出风口有点漏水，需要清洗和检查 gas。", photos: ["https://images.unsplash.com/photo-1545259741-2ea3ebf61fa3?auto=format&fit=crop&w=400&q=80"], dist: "1.2km", address: "Taman Equine, Seri Kembangan", time: "10分钟前", status: "open", comments: [{ id: 101, sifu: "王师傅", text: "老板，这个情况应该是要做 Chemical wash 了。普通洗 RM100，药水洗 RM150。", time: "5分钟前", priceOffer: "RM 150" }] },
+  { id: 2, user: "Jason Lim", avatar: null, category: "房屋修缮", title: "厨房洗手盆下面漏水", desc: "应该是水管老化了，整个柜子都湿了。需要换新的水管。", photos: ["https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=400&q=80"], dist: "3.5km", address: "Puchong Jaya", time: "2小时前", status: "open", comments: [] }
 ];
 
 // ==========================================
@@ -1024,20 +942,7 @@ const App = () => {
     // 新增：订单 Tab 状态 (orders vs requests)
     const [orderTab, setOrderTab] = useState('active'); // active, history, requests
     const [myRequests, setMyRequests] = useState(initialUserRequests); // 使用模拟数据
-    const [newRequest, setNewRequest] = useState({ 
-        cat: "房屋修缮", 
-        title: "", 
-        desc: "", 
-        date: "", 
-        time: "", 
-        address: "" 
-    });
-
-    // 新增：需求详情弹窗状态
-    const [selectedRequestDetail, setSelectedRequestDetail] = useState(null);
-    
-    // 新增：预约确认弹窗状态
-    const [bookingConfirm, setBookingConfirm] = useState(null); // { sifuName: "", priceOffer: "" }
+    const [newRequest, setNewRequest] = useState({ cat: "房屋修缮", title: "", desc: "" });
 
     // ... (保留 Data, SOS state, Handlers 等) ...
     // Data
@@ -1086,9 +991,7 @@ const App = () => {
 
     // 新增：提交需求逻辑
     const handleSubmitRequest = () => {
-        if(!newRequest.title || !newRequest.desc || !newRequest.address || !newRequest.date || !newRequest.time) {
-            return alert("请填写完整信息（标题、描述、地址、日期和时间都必填）");
-        }
+        if(!newRequest.title || !newRequest.desc) return alert("请填写完整信息");
         const req = {
             id: Date.now(),
             user: "Alex Tan",
@@ -1098,16 +1001,14 @@ const App = () => {
             desc: newRequest.desc,
             photos: [],
             dist: "0.0km",
-            address: newRequest.address, // 使用用户输入的地址
-            scheduledDate: newRequest.date, // 新增：预约日期
-            scheduledTime: newRequest.time, // 新增：预约时间
-            time: "刚刚", // 发布时间
+            address: "Current Location",
+            time: "刚刚",
             status: "open",
             comments: []
         };
         setMyRequests([req, ...myRequests]);
         toggleModal('postRequest', false);
-        setNewRequest({ cat: "房屋修缮", title: "", desc: "", date: "", time: "", address: "" });
+        setNewRequest({ cat: "房屋修缮", title: "", desc: "" });
         setActiveTab('orders');
         setOrderTab('requests'); // 跳转到需求列表
     };
@@ -1276,50 +1177,19 @@ const App = () => {
                                      <div key={req.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                                          <div className="flex justify-between items-start mb-2">
                                              <span className="bg-blue-50 text-brand-blue text-[10px] font-bold px-2 py-1 rounded">{req.category}</span>
-                                             <div className="flex items-center gap-2">
-                                                 <span className="text-[10px] text-gray-400">{req.time}</span>
-                                                 <button 
-                                                     onClick={() => setSelectedRequestDetail(req)}
-                                                     className="px-3 py-1.5 bg-gray-800 text-white text-[10px] font-bold rounded-lg hover:bg-gray-700 transition flex items-center gap-1"
-                                                 >
-                                                     更多 <ChevronRight size={12}/>
-                                                 </button>
-                                             </div>
+                                             <span className="text-[10px] text-gray-400">{req.time}</span>
                                          </div>
                                          <h3 className="font-bold text-gray-800 mb-1">{req.title}</h3>
-                                         <p className="text-xs text-gray-500 mb-3 line-clamp-2">{req.desc}</p>
-                                         
-                                         {/* 显示地址和时间信息 */}
-                                         {req.address && (
-                                             <div className="flex items-center gap-4 mb-3 text-[10px] text-gray-400">
-                                                 <span className="flex items-center gap-1"><MapPin size={12}/> {req.address}</span>
-                                                 {req.scheduledDate && (
-                                                     <span className="flex items-center gap-1"><Clock size={12}/> {req.scheduledDate} {req.scheduledTime}</span>
-                                                 )}
-                                             </div>
-                                         )}
-
+                                         <p className="text-xs text-gray-500 mb-3">{req.desc}</p>
                                          <div className="bg-gray-50 p-3 rounded-xl">
-                                             <h4 className="text-xs font-bold text-gray-700 mb-2">师傅报价/留言 ({req.comments ? req.comments.length : 0})</h4>
-                                             {req.comments && req.comments.length > 0 ? (
-                                                 <div className="space-y-2">
-                                                     {req.comments.slice(0, 2).map(c => (
-                                                         <div key={c.id} className="text-xs">
-                                                             <div className="flex justify-between items-start">
-                                                                 <span className="font-bold text-gray-700">{c.sifu}</span>
-                                                                 {c.priceOffer && (
-                                                                     <span className="text-brand-orange font-bold">{c.priceOffer}</span>
-                                                                 )}
-                                                             </div>
-                                                             <p className="text-gray-500 mt-1">{c.text}</p>
-                                                         </div>
-                                                     ))}
-                                                     {req.comments.length > 2 && (
-                                                         <p className="text-[10px] text-brand-blue font-bold cursor-pointer" onClick={() => setSelectedRequestDetail(req)}>
-                                                             查看全部 {req.comments.length} 条报价...
-                                                         </p>
-                                                     )}
-                                                 </div>
+                                             <h4 className="text-xs font-bold text-gray-700 mb-2">师傅报价/留言 ({req.comments.length})</h4>
+                                             {req.comments.length > 0 ? (
+                                                 req.comments.map(c => (
+                                                     <div key={c.id} className="mb-2 last:mb-0 text-xs">
+                                                         <div className="flex justify-between"><span className="font-bold">{c.sifu}</span><span className="text-brand-orange font-bold">{c.priceOffer}</span></div>
+                                                         <p className="text-gray-500">{c.text}</p>
+                                                     </div>
+                                                 ))
                                              ) : (
                                                  <p className="text-[10px] text-gray-400">暂时还没有师傅报价，请耐心等待。</p>
                                              )}
@@ -1429,216 +1299,18 @@ const App = () => {
             {modals.payment && (<div className="absolute inset-0 z-50 bg-gray-50 flex flex-col animate-slide-up md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[400px] md:h-[600px] md:rounded-2xl md:shadow-2xl md:border md:bg-white"><div className="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-10"><button onClick={() => toggleModal('payment', false)}><ChevronLeft /></button><h3 className="font-bold text-lg">{t('payment_method')}</h3></div><div className="p-4 space-y-3 flex-1 overflow-y-auto">{cardList.map(card => (<div key={card.id} className={`p-5 rounded-2xl shadow-lg relative overflow-hidden mb-2 ${card.type === 'visa' ? 'bg-gradient-to-r from-gray-800 to-gray-900 text-white' : 'bg-blue-500 text-white'}`}><div className="absolute right-0 top-0 w-20 h-20 bg-white/10 rounded-full -mr-5 -mt-5"></div><p className="text-xs opacity-70 mb-4">{card.brand}</p><p className="text-xl font-mono tracking-widest mb-4">{card.number}</p><div className="flex justify-between items-end"><span className="text-xs opacity-70">EXP {card.expiry}</span></div></div>))}<button onClick={() => toggleModal('addCard', true)} className="w-full border-2 border-dashed border-gray-300 rounded-xl py-3 text-gray-400 font-bold text-sm mt-4 flex items-center justify-center gap-2 hover:border-brand-blue hover:text-brand-blue transition"><Plus size={16} /> {t('bind_card')}</button><div className="h-20"></div></div></div>)}
             {modals.addCard && (<div className="absolute inset-0 z-[60] bg-black/50 flex items-center justify-center p-6 animate-fade-in"><div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 animate-scale-up"><h3 className="font-bold text-lg mb-4">{t('bind_card')}</h3><input type="text" placeholder="卡号" value={newCard.no} onChange={e => setNewCard({ ...newCard, no: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3" /><div className="flex gap-3 mb-3"><input type="text" placeholder="MM/YY" value={newCard.expiry} onChange={e => setNewCard({ ...newCard, expiry: e.target.value })} className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm" /><input type="text" placeholder="CVV" value={newCard.cvv} onChange={e => setNewCard({ ...newCard, cvv: e.target.value })} className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm" /></div><div className="flex gap-3 mt-6"><button onClick={() => toggleModal('addCard', false)} className="flex-1 py-2 text-gray-500 font-bold text-sm bg-gray-100 rounded-lg">{t('cancel')}</button><button onClick={handleAddCard} className="flex-1 py-2 bg-brand-blue text-white rounded-lg font-bold text-sm shadow-md">{t('save')}</button></div></div></div>)}
             {modals.help && (<div className="absolute inset-0 z-50 bg-gray-50 flex flex-col animate-slide-up md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[400px] md:h-[600px] md:rounded-2xl md:shadow-2xl md:border md:bg-white"><div className="bg-white p-4 shadow-sm flex items-center gap-3 sticky top-0 z-10"><button onClick={() => toggleModal('help', false)}><ChevronLeft /></button><h3 className="font-bold text-lg">{t('help_center')}</h3></div><div className="p-4 flex-1 overflow-y-auto"><h4 className="font-bold text-gray-800 mb-3">{t('faq')}</h4><div className="space-y-3">{[{ q: "如何预约 Sifu?", a: "在首页选择服务类型，浏览师傅列表，点击'立即预约'即可。" },{ q: "收费标准是怎样的?", a: "所有服务均有起步价。具体价格由师傅上门检测后报价，您同意后才开始工作。" },{ q: "如何申请退款?", a: "如果服务未完成或有争议，请在订单页面点击'联系客服'，我们会介入处理。" },{ q: "怎样成为 Sifu?", a: "请下载 'Sifu-Pro' 版本的 App 进行注册和技能认证。" }].map((item, i) => (<div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"><div onClick={() => setExpandedFaq(expandedFaq === i ? null : i)} className="p-4 flex justify-between items-center cursor-pointer bg-white"><span className="text-sm text-gray-700 font-medium">{t(item.q)}</span><ChevronDown size={16} className={`text-gray-300 transition-transform ${expandedFaq === i ? 'rotate-180' : ''}`} /></div>{expandedFaq === i && <div className="px-4 pb-4 text-xs text-gray-500 bg-gray-50/50 leading-relaxed border-t border-gray-50 pt-2">{t(item.a)}</div>}</div>))}</div><button className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl shadow-lg mt-8 flex items-center justify-center gap-2"><Headphones size={18} /> {t('contact_support')}</button><div className="h-20"></div></div></div>)}
-			{/* 需求详情弹窗 */}
-			{selectedRequestDetail && (
-				<div className="fixed inset-0 z-[125] bg-black/60 backdrop-blur-sm flex items-end md:items-center md:justify-center animate-fade-in">
-					<div className="bg-white w-full md:w-[600px] h-[85vh] md:h-[700px] rounded-t-3xl md:rounded-2xl flex flex-col animate-slide-up shadow-2xl overflow-hidden">
-						{/* 标题栏 */}
-						<div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
-							<h3 className="font-bold text-lg text-gray-800">需求详情</h3>
-							<button onClick={() => setSelectedRequestDetail(null)} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition text-gray-500">
-								<X size={20}/>
-							</button>
-						</div>
-
-						{/* 内容区域 */}
-						<div className="flex-1 overflow-y-auto p-5 pb-24 no-scrollbar bg-gray-50">
-							{/* 需求信息 */}
-							<div className="bg-white p-5 rounded-2xl mb-6 shadow-sm border border-gray-100">
-								<div className="flex justify-between items-start mb-3">
-									<span className="bg-blue-50 text-brand-blue text-xs font-bold px-3 py-1 rounded-full">{selectedRequestDetail.category}</span>
-									<span className={`text-xs px-2 py-1 rounded-full font-bold ${selectedRequestDetail.status === 'open' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
-										{selectedRequestDetail.status === 'open' ? '报价中' : '已关闭'}
-									</span>
-								</div>
-								<h2 className="font-bold text-xl text-gray-900 mb-2 leading-tight">{selectedRequestDetail.title}</h2>
-								<p className="text-sm text-gray-600 mb-4 leading-relaxed">{selectedRequestDetail.desc}</p>
-								
-								{/* 地址和时间信息 */}
-								<div className="grid grid-cols-1 gap-3 mb-4">
-									<div className="flex items-center gap-2 text-sm text-gray-500">
-										<MapPin size={16} className="text-brand-blue"/> 
-										<span className="font-medium">地址：</span>
-										<span>{selectedRequestDetail.address}</span>
-									</div>
-									{selectedRequestDetail.scheduledDate && (
-										<div className="flex items-center gap-2 text-sm text-gray-500">
-											<Clock size={16} className="text-brand-blue"/> 
-											<span className="font-medium">希望时间：</span>
-											<span>{selectedRequestDetail.scheduledDate} {selectedRequestDetail.scheduledTime}</span>
-										</div>
-									)}
-								</div>
-
-								{/* 照片（如果有） */}
-								{selectedRequestDetail.photos && selectedRequestDetail.photos.length > 0 && (
-									<div className="mb-4">
-										<h4 className="text-sm font-bold text-gray-700 mb-2">相关照片</h4>
-										<div className="flex gap-2">
-											{selectedRequestDetail.photos.map((photo, idx) => (
-												<div key={idx} className="w-20 h-20 rounded-xl bg-gray-200 bg-cover bg-center border border-gray-100" style={{backgroundImage: `url(${photo})`}}></div>
-											))}
-										</div>
-									</div>
-								)}
-							</div>
-
-							{/* 师傅报价列表 */}
-							<h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider ml-1">
-								师傅报价列表 ({selectedRequestDetail.comments ? selectedRequestDetail.comments.length : 0})
-							</h4>
-							<div className="space-y-4">
-								{selectedRequestDetail.comments && selectedRequestDetail.comments.map(comment => (
-									<div key={comment.id} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:border-brand-blue transition">
-										{/* 师傅信息 */}
-										<div className="flex justify-between items-center mb-4">
-											<div className="flex items-center gap-3">
-												<div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center font-bold text-brand-blue text-lg border border-blue-50">
-													{comment.avatar || comment.sifu[0]}
-												</div>
-												<div>
-													<h5 className="font-bold text-sm text-gray-800">{comment.sifu}</h5>
-													{comment.rating && (
-														<div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
-															<Star size={12} className="fill-yellow-400 text-yellow-400"/> 
-															{comment.rating} • {comment.completedJobs}单
-														</div>
-													)}
-												</div>
-											</div>
-											<div className="text-right">
-												<span className="block text-xl font-bold text-brand-orange">{comment.priceOffer}</span>
-												<span className="text-xs text-gray-400">预估报价</span>
-											</div>
-										</div>
-
-										{/* 报价内容 */}
-										<div className="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 leading-relaxed mb-4">
-											<div className="flex items-start gap-2">
-												<MessageCircle size={14} className="text-gray-400 mt-0.5 flex-shrink-0"/>
-												<span>"{comment.text}"</span>
-											</div>
-										</div>
-
-										{/* 操作按钮 */}
-										<div className="flex gap-3">
-											<button className="flex-1 py-2.5 border border-gray-300 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition flex items-center justify-center gap-1">
-												<MessageCircle size={16}/>
-												咨询
-											</button>
-											<button 
-												onClick={() => {
-													setBookingConfirm({
-														sifuName: comment.sifu,
-														priceOffer: comment.priceOffer
-													});
-												}}
-												className="flex-1 py-2.5 bg-brand-blue text-white rounded-xl text-sm font-bold shadow-md hover:bg-blue-700 active:scale-95 transition flex items-center justify-center gap-1"
-											>
-												<CheckCircle size={16}/>
-												立即预约
-											</button>
-										</div>
-
-										{/* 时间标记 */}
-										<div className="mt-3 text-xs text-gray-400 text-right">
-											{comment.time}
-										</div>
-									</div>
-								))}
-								
-								{(!selectedRequestDetail.comments || selectedRequestDetail.comments.length === 0) && (
-									<div className="text-center text-gray-400 text-sm py-12 bg-white rounded-2xl border border-dashed border-gray-200">
-										<MessageCircle size={32} className="mx-auto mb-3 text-gray-300"/>
-										<p>暂无师傅报价，请耐心等待...</p>
-									</div>
-								)}
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
-
-			{/* 预约确认弹窗 */}
-			{bookingConfirm && (
-				<div className="fixed inset-0 z-[130] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in">
-					<div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl animate-scale-up overflow-hidden">
-						{/* 内容区域 */}
-						<div className="p-6">
-							{/* 图标 */}
-							<div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-								<AlertTriangle size={32} className="text-brand-blue" />
-							</div>
-							
-							{/* 标题 */}
-							<h3 className="font-bold text-lg text-gray-800 text-center mb-4">确认预约</h3>
-							
-							{/* 师傅信息 */}
-							<div className="bg-gray-50 rounded-xl p-4 mb-4">
-								<div className="text-center">
-									<p className="text-sm text-gray-600 mb-1">师傅：</p>
-									<p className="font-bold text-lg text-gray-800">{bookingConfirm.sifuName}</p>
-									{bookingConfirm.priceOffer && (
-										<>
-											<p className="text-sm text-gray-600 mt-2 mb-1">报价：</p>
-											<p className="font-bold text-xl text-brand-orange">{bookingConfirm.priceOffer}</p>
-										</>
-									)}
-								</div>
-							</div>
-
-							{/* 温馨提示 */}
-							<div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
-								<div className="flex items-start gap-3">
-									<AlertTriangle size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
-									<div>
-										<p className="text-sm font-bold text-orange-800 mb-1">温馨提示</p>
-										<p className="text-xs text-orange-700 leading-relaxed">
-											每单预约设有最低RM50的起步价，用于涵盖师傅的基本检查与运输成本。
-										</p>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						{/* 按钮区域 */}
-						<div className="border-t border-gray-100 p-4 bg-gray-50 flex gap-3">
-							<button
-								onClick={() => setBookingConfirm(null)}
-								className="flex-1 py-3 rounded-xl font-bold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 active:scale-95 transition"
-							>
-								取消
-							</button>
-							<button
-								onClick={() => {
-									alert(`已预约 ${bookingConfirm.sifuName}！师傅稍后会联系您确认详细安排。`);
-									setBookingConfirm(null);
-									setSelectedRequestDetail(null);
-								}}
-								className="flex-1 py-3 rounded-xl font-bold text-white bg-brand-blue shadow-md hover:bg-blue-700 active:scale-95 transition"
-							>
-								确认
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
-
 			{/* Post Request Modal */}
 			{modals.postRequest && (
 			  <div className="fixed inset-0 z-[120] bg-black/50 flex items-end md:items-center md:justify-center animate-fade-in">
-				<div className="bg-white w-full max-h-[90vh] rounded-t-3xl flex flex-col animate-slide-up md:rounded-2xl md:w-[420px] md:max-h-[85vh] md:shadow-2xl overflow-hidden">
-				  {/* 标题栏 - 固定 */}
-				  <div className="flex justify-between items-center p-6 pb-4 border-b border-gray-100 flex-shrink-0">
+				<div className="bg-white w-full rounded-t-3xl p-6 pb-[110px] animate-slide-up md:rounded-2xl md:w-[420px] md:pb-6 md:shadow-2xl">
+				  <div className="flex justify-between items-center mb-4">
 					<h3 className="font-bold text-lg text-gray-800">发布需求帖</h3>
 					<button onClick={() => toggleModal('postRequest', false)}>
 					  <X size={20} className="text-gray-400" />
 					</button>
 				  </div>
 
-				  {/* 内容区域 - 可滚动 */}
-				  <div className="flex-1 overflow-y-auto p-6 pt-4 pb-4 no-scrollbar">
-					<div className="space-y-3">
+				  <div className="space-y-3">
 					<div>
 					  <label className="text-xs font-bold text-gray-400 uppercase">分类</label>
 					  <select
@@ -1665,63 +1337,25 @@ const App = () => {
 					</div>
 
 					<div>
-					  <label className="text-xs font-bold text-gray-400 uppercase">详细描述</label>
+					  <label className="text-xs font-bold text-gray-400 uppercase">描述</label>
 					  <textarea
 						value={newRequest.desc}
 						onChange={(e) => setNewRequest(prev => ({ ...prev, desc: e.target.value }))}
-						placeholder="描述问题的具体情况、严重程度等..."
+						placeholder="描述问题、地点、时间、是否有照片等..."
 						className="w-full mt-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-blue h-28 resize-none"
 					  />
 					</div>
 
-					<div>
-					  <label className="text-xs font-bold text-gray-400 uppercase">住家地址 *</label>
-					  <input
-						type="text"
-						value={newRequest.address}
-						onChange={(e) => setNewRequest(prev => ({ ...prev, address: e.target.value }))}
-						placeholder="例如：No.123, Jalan ABC, Taman XYZ, 43300 Seri Kembangan, Selangor"
-						className="w-full mt-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-blue"
-					  />
-					</div>
-
-					<div className="grid grid-cols-2 gap-3">
-					  <div>
-						<label className="text-xs font-bold text-gray-400 uppercase">希望日期 *</label>
-						<input
-						  type="date"
-						  value={newRequest.date}
-						  onChange={(e) => setNewRequest(prev => ({ ...prev, date: e.target.value }))}
-						  min={new Date().toISOString().split('T')[0]}
-						  className="w-full mt-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-blue"
-						/>
-					  </div>
-
-					  <div>
-						<label className="text-xs font-bold text-gray-400 uppercase">希望时间 *</label>
-						<input
-						  type="time"
-						  value={newRequest.time}
-						  onChange={(e) => setNewRequest(prev => ({ ...prev, time: e.target.value }))}
-						  className="w-full mt-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-blue"
-						/>
-					  </div>
-					</div>
-					</div>
-				  </div>
-
-				  {/* 按钮区域 - 固定在底部 */}
-				  <div className="border-t border-gray-100 p-6 pt-4 bg-white flex-shrink-0">
 					<button
 					  onClick={handleSubmitRequest}
-					  className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 transition mb-3"
+					  className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 transition"
 					>
 					  发布
 					</button>
 
 					<button
 					  onClick={() => toggleModal('postRequest', false)}
-					  className="w-full py-3 rounded-xl font-bold text-gray-500 bg-gray-100 active:scale-95 transition"
+					  className="w-full py-3 rounded-xl font-bold text-gray-500 bg-gray-100"
 					>
 					  取消
 					</button>
